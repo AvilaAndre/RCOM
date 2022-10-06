@@ -29,7 +29,8 @@ unsigned char saved_chars[];
 int ptr = 0;
 
 
-int verify_state(unsigned char val, int fd) {    
+int verify_state(unsigned char val, int fd) {  
+    printf("0x%02X %d ptr: %d\n", val, state, ptr);  
     while (TRUE) {
         switch (state)
         {
@@ -50,7 +51,9 @@ int verify_state(unsigned char val, int fd) {
                 return 0;
             }
         case 2:
-            saved_chars[ptr] = val;
+            printf("AAasdaaaaAA %d \n", ptr); // ptr is 4
+            saved_chars[ptr] = val; // something strange is happening here.
+            printf("AAasdAA 0x%02X %d \n", saved_chars[4], ptr); // ptr is 126
             ptr++;
             if (val == 0x7E){
                 state = 3;
@@ -71,6 +74,9 @@ int verify_state(unsigned char val, int fd) {
             ptr = 0;
             if (saved_chars[2] == 0x03) {
                 saved_chars[2] = 0x07;
+                saved_chars[3] = saved_chars[1]^saved_chars[2];
+                saved_chars[4] = 0x7E;
+                printf("AAAA 0x%02X %d \n", saved_chars[4], state);
                 printf("log > Sending UA \n");
                 int bytes = write(fd, saved_chars, BUF_SIZE);
                 return 0;
@@ -84,6 +90,9 @@ int verify_state(unsigned char val, int fd) {
     }
 }
 
+
+// SET=[FLAG,A,C,BCC,FLAG]
+// SET = 0x7E | 0x03 | 0x03 | BCC | 0x7E
 
 
 
@@ -155,7 +164,6 @@ int main(int argc, char *argv[])
     // Loop for input
     unsigned char buf[BUF_SIZE + 1] = {0}; // +1: Save space for the final '\0' char
 
-    unsigned char ret[5] = "";
     int byt_ptr = 0;
 
     while (STOP == FALSE)
@@ -189,7 +197,3 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-
-
-// SET=[FLAG,A,C,BCC,FLAG]
-// SET = 0x7E | 0x03 | 0x03 | BCC | 0x7E

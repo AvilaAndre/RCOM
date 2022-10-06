@@ -23,6 +23,67 @@
 
 volatile int STOP = FALSE;
 
+int state = 0;
+unsigned char saved_chars[];
+int ptr = 0;
+
+
+int verify_state(unsigned char val, int fd) {  
+    printf("0x%02X %d \n", val, state);
+    while (TRUE) {
+        switch (state)
+        {
+        case 0:
+            if (val == 0x7E) {
+                printf("log > Received flag \n");
+                state = 1;
+                saved_chars[ptr] = val;
+                ptr++;
+                return 0;
+            }
+            break;   
+        case 1:
+            if (val != 0x7E) {
+                state = 2;
+                saved_chars[ptr] = val;
+                ptr++;
+                return 0;
+            }
+        case 2:
+            saved_chars[ptr] = val;
+            ptr++;
+            if (val == 0x7E){
+                state = 3;
+            } else {
+                return 0;
+            }
+        case 3:
+            if (saved_chars[3] == (saved_chars[1]^saved_chars[2]) && ptr > 4) {
+                state = 4;
+            } else {
+                state = 0;
+                printf("log > Input, restarting... \n");
+                ptr = 0;
+                return 0;
+            } 
+        case 4:
+            state = 0;
+            ptr = 0;
+            if (saved_chars[2] == 0x03) {
+                printf("log > Deactivating alarm. \n");
+                return 1;
+            }
+            printf("log > Wrong C \n");
+            return -1;
+        default:
+            break;
+        }
+        return 0;
+    }
+}
+
+
+
 int main(int argc, char *argv[])
 {
     // Program usage: Uses either COM1 or COM2
@@ -90,12 +151,7 @@ int main(int argc, char *argv[])
     printf("New termios structure set\n");
 
     // Create string to send
-    unsigned char buf[BUF_SIZE] = {0};
-
-    for (int i = 0; i < BUF_SIZE; i++)
-    {
-        buf[i] = 'a' + i % 26;
-    }
+    unsigned char buf[BUF_SIZE +1] = {0};
 
     buf[5] = '\n';
 
@@ -111,7 +167,6 @@ int main(int argc, char *argv[])
     // Wait until all bytes have been written to the serial port
     sleep(1);
 
-    unsigned char ret[5] = "";
     int byt_ptr = 0;
 
     while (STOP == FALSE)
@@ -120,14 +175,13 @@ int main(int argc, char *argv[])
         while(byt_ptr != 5) {
             read(fd, buf, 1);
             if (buf != 0) {
-                ret[byt_ptr] = buf[0];
-                //printf(":%s\n", buf);
                 byt_ptr++;
+                int ans = verify_state(buf[0], fd);
+                if (ans == 1) {
+                    STOP = TRUE;
+                }
             }
         }
-        STOP = TRUE;
-        ret[byt_ptr] = '\0';
-        printf("> Receiver: %s\n", ret);
     }
 
     // Restore the old port settings
