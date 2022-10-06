@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
     fgets(buf, BUF_SIZE + 1, stdin);
     buf[5] = '\n';
 
-    //buf[0] = 0x7E;
+    buf[0] = 0x7E;
 
     int bytes = write(fd, buf, BUF_SIZE);
     printf("%d bytes written\n", bytes);

@@ -23,6 +23,66 @@
 
 volatile int STOP = FALSE;
 
+
+int state = 0;
+unsigned char saved_chars[];
+
+
+int verify_state(unsigned char val, int fd) {
+    printf("VERIFY \n");
+
+    printf("VERIFY VAL: %hhu \n", val);
+    printf("VERIFY STATE: %d \n", state);
+    
+    int ptr = 0;
+    switch (state)
+    {
+    case 0:
+        if (val == 0x7E) {
+            state = 1;
+            saved_chars[ptr] = val;
+            ptr++;
+            return 0;
+        }
+        break;   
+    case 1:
+        if (val != 0x7E) {
+            state = 2;
+            saved_chars[ptr] = val;
+            ptr++;
+            return 0;
+        }
+    case 2:
+        saved_chars[ptr] = val;
+        ptr++;
+        if (val == 0x7E){
+            state = 3;
+        }
+        return 0;
+    case 3:
+        if (saved_chars[3] == (saved_chars[1]^saved_chars[2]) && ptr > 4) {
+            state = 4;
+        } else {
+            state = 0;
+            ptr = 0;
+        }
+        break;  
+    case 4:
+        state = 0;
+        ptr = 0;
+        if (saved_chars[2] == 0x03) {
+            saved_chars[2] = 0x07;
+            int bytes = write(fd, saved_chars, BUF_SIZE);
+        }
+    default:
+        break;
+    }
+    return 0;
+}
+
+
+
+
 int main(int argc, char *argv[])
 {
     // Program usage: Uses either COM1 or COM2
@@ -103,6 +163,8 @@ int main(int argc, char *argv[])
                 ret[byt_ptr] = buf[0];
                 //printf(":%s\n", buf);
                 byt_ptr++;
+                printf("BEFORE VERIFY \n");
+                verify_state(buf[0], fd);
             }
         }
         STOP = TRUE;
@@ -133,26 +195,5 @@ int main(int argc, char *argv[])
 
 
 
-int state = 0;
-
-int verify_state(unsigned char val, unsigned char[] saved_chars*) {
-    int ptr = 0;
-
-    while (ptr < 5) {
-        switch (state)
-        {
-        case 0:
-            if (val == 0x7E) {
-                state = 1;
-                return 0;
-            }
-            break;
-        
-        default:
-            break;
-        }
-    }
-
-
-    return 0;
-}
+// SET=[FLAG,A,C,BCC,FLAG]
+// SET = 0x7E | 0x03 | 0x03 | BCC | 0x7E
