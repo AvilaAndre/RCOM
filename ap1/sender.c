@@ -97,14 +97,15 @@ int main(int argc, char *argv[])
         buf[i] = 'a' + i % 26;
     }
 
-    printf("> Sender: ");
-
-    fgets(buf, BUF_SIZE + 1, stdin);
     buf[5] = '\n';
 
-    buf[0] = 0x7E;
+    buf[0] = 0x7E; // FLAG
+    buf[1] = 0x03; // A
+    buf[2] = 0x03; // C
+    buf[3] = 0x00; // BCC
+    buf[4] = 0x7E; // FLAG
 
-    int bytes = write(fd, buf, BUF_SIZE);
+    int bytes = write(fd, buf, 5);
     printf("%d bytes written\n", bytes);
 
     // Wait until all bytes have been written to the serial port

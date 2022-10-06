@@ -26,58 +26,62 @@ volatile int STOP = FALSE;
 
 int state = 0;
 unsigned char saved_chars[];
+int ptr = 0;
 
 
-int verify_state(unsigned char val, int fd) {
-    printf("VERIFY \n");
-
-    printf("VERIFY VAL: %hhu \n", val);
-    printf("VERIFY STATE: %d \n", state);
-    
-    int ptr = 0;
-    switch (state)
-    {
-    case 0:
-        if (val == 0x7E) {
-            state = 1;
+int verify_state(unsigned char val, int fd) {    
+    while (TRUE) {
+        switch (state)
+        {
+        case 0:
+            if (val == 0x7E) {
+                printf("log > Received flag \n");
+                state = 1;
+                saved_chars[ptr] = val;
+                ptr++;
+                return 0;
+            }
+            break;   
+        case 1:
+            if (val != 0x7E) {
+                state = 2;
+                saved_chars[ptr] = val;
+                ptr++;
+                return 0;
+            }
+        case 2:
             saved_chars[ptr] = val;
             ptr++;
-            return 0;
-        }
-        break;   
-    case 1:
-        if (val != 0x7E) {
-            state = 2;
-            saved_chars[ptr] = val;
-            ptr++;
-            return 0;
-        }
-    case 2:
-        saved_chars[ptr] = val;
-        ptr++;
-        if (val == 0x7E){
-            state = 3;
-        }
-        return 0;
-    case 3:
-        if (saved_chars[3] == (saved_chars[1]^saved_chars[2]) && ptr > 4) {
-            state = 4;
-        } else {
+            if (val == 0x7E){
+                state = 3;
+            } else {
+                return 0;
+            }
+        case 3:
+            if (saved_chars[3] == (saved_chars[1]^saved_chars[2]) && ptr > 4) {
+                state = 4;
+            } else {
+                state = 0;
+                printf("log > Input, restarting... \n");
+                ptr = 0;
+                return 0;
+            } 
+        case 4:
             state = 0;
             ptr = 0;
+            if (saved_chars[2] == 0x03) {
+                saved_chars[2] = 0x07;
+                printf("log > Sending UA \n");
+                int bytes = write(fd, saved_chars, BUF_SIZE);
+                return 0;
+            }
+            printf("log > Wrong C \n");
+            return 0;
+        default:
+            break;
         }
-        break;  
-    case 4:
-        state = 0;
-        ptr = 0;
-        if (saved_chars[2] == 0x03) {
-            saved_chars[2] = 0x07;
-            int bytes = write(fd, saved_chars, BUF_SIZE);
-        }
-    default:
-        break;
+        return 0;
     }
-    return 0;
 }
 
 
@@ -160,20 +164,12 @@ int main(int argc, char *argv[])
         while(byt_ptr != 5) {
             read(fd, buf, 1);
             if (buf != 0) {
-                ret[byt_ptr] = buf[0];
-                //printf(":%s\n", buf);
                 byt_ptr++;
-                printf("BEFORE VERIFY \n");
                 verify_state(buf[0], fd);
             }
         }
         STOP = TRUE;
-        ret[byt_ptr] = '\0';
-        printf("> Sender: %s \n", ret);
     }
-
-    int bytes = write(fd, ret, BUF_SIZE);
-    printf("%d bytes written by the receiver \n", bytes);
 
 
     //STATE MACHINE
