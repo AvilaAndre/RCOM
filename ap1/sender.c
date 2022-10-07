@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <termios.h>
 #include <unistd.h>
+#include "alarm.c"
 
 // Baudrate settings are defined in <asm/termbits.h>, which is
 // included by <termios.h>
@@ -24,12 +25,11 @@
 volatile int STOP = FALSE;
 
 int state = 0;
-unsigned char saved_chars[];
+unsigned char saved_chars[BUF_SIZE] = {};
 int ptr = 0;
 
 
 int verify_state(unsigned char val, int fd) {  
-    printf("0x%02X %d \n", val, state);
     while (TRUE) {
         switch (state)
         {
@@ -69,8 +69,9 @@ int verify_state(unsigned char val, int fd) {
         case 4:
             state = 0;
             ptr = 0;
-            if (saved_chars[2] == 0x03) {
+            if (saved_chars[2] == 0x07) {
                 printf("log > Deactivating alarm. \n");
+                killAlarm();
                 return 1;
             }
             printf("log > Wrong C \n");
@@ -82,6 +83,22 @@ int verify_state(unsigned char val, int fd) {
     }
 }
 
+int fd;
+
+unsigned char buf[BUF_SIZE +1] = {0};
+
+
+int sendSET() {
+    buf[0] = 0x7E; // FLAG
+    buf[1] = 0x03; // A
+    buf[2] = 0x03; // C
+    buf[3] = 0x00; // BCC
+    buf[4] = 0x7E; // FLAG
+
+    int bytes = write(fd, buf, 5);
+    printf("SET flag sent, %d bytes written\n", bytes);
+    return bytes;
+}
 
 
 int main(int argc, char *argv[])
@@ -101,7 +118,7 @@ int main(int argc, char *argv[])
 
     // Open serial port device for reading and writing, and not as controlling tty
     // because we don't want to get killed if linenoise sends CTRL-C.
-    int fd = open(serialPortName, O_RDWR | O_NOCTTY);
+    fd = open(serialPortName, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
     if (fd < 0)
     {
@@ -150,19 +167,7 @@ int main(int argc, char *argv[])
 
     printf("New termios structure set\n");
 
-    // Create string to send
-    unsigned char buf[BUF_SIZE +1] = {0};
-
-    buf[5] = '\n';
-
-    buf[0] = 0x7E; // FLAG
-    buf[1] = 0x03; // A
-    buf[2] = 0x03; // C
-    buf[3] = 0x00; // BCC
-    buf[4] = 0x7E; // FLAG
-
-    int bytes = write(fd, buf, 5);
-    printf("%d bytes written\n", bytes);
+    int bytes = sendSET();
 
     // Wait until all bytes have been written to the serial port
     sleep(1);
@@ -171,10 +176,15 @@ int main(int argc, char *argv[])
 
     while (STOP == FALSE)
     {
+        if (!alarmEnabled) {
+            sendSET(); 
+        }
+        startAlarm(3);
+
         // Returns after 5 chars have been input
         while(byt_ptr != 5) {
-            read(fd, buf, 1);
-            if (buf != 0) {
+            int bytes_ = read(fd, buf, 1);
+            if (buf != 0 && bytes > -1) {
                 byt_ptr++;
                 int ans = verify_state(buf[0], fd);
                 if (ans == 1) {

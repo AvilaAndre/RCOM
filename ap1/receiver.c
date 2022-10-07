@@ -25,12 +25,11 @@ volatile int STOP = FALSE;
 
 
 int state = 0;
-unsigned char saved_chars[];
+unsigned char saved_chars[BUF_SIZE];
 int ptr = 0;
 
 
 int verify_state(unsigned char val, int fd) {  
-    printf("0x%02X %d ptr: %d\n", val, state, ptr);  
     while (TRUE) {
         switch (state)
         {
@@ -51,9 +50,7 @@ int verify_state(unsigned char val, int fd) {
                 return 0;
             }
         case 2:
-            printf("AAasdaaaaAA %d \n", ptr); // ptr is 4
-            saved_chars[ptr] = val; // something strange is happening here.
-            printf("AAasdAA 0x%02X %d \n", saved_chars[4], ptr); // ptr is 126
+            saved_chars[ptr] = val; // time was wasted here
             ptr++;
             if (val == 0x7E){
                 state = 3;
@@ -76,7 +73,6 @@ int verify_state(unsigned char val, int fd) {
                 saved_chars[2] = 0x07;
                 saved_chars[3] = saved_chars[1]^saved_chars[2];
                 saved_chars[4] = 0x7E;
-                printf("AAAA 0x%02X %d \n", saved_chars[4], state);
                 printf("log > Sending UA \n");
                 int bytes = write(fd, saved_chars, BUF_SIZE);
                 return 0;
