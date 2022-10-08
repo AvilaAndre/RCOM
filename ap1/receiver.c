@@ -74,7 +74,7 @@ int verify_state(unsigned char val, int fd) {
                 saved_chars[3] = saved_chars[1]^saved_chars[2];
                 saved_chars[4] = 0x7E;
                 printf("log > Sending UA \n");
-                int bytes = write(fd, saved_chars, BUF_SIZE);
+                write(fd, saved_chars, BUF_SIZE);
                 return 0;
             }
             printf("log > Wrong C \n");

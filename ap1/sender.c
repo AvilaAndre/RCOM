@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
     struct termios oldtio;
     struct termios newtio;
 
-    // Save current port settings
+    // Save current port settingsS
     if (tcgetattr(fd, &oldtio) == -1)
     {
         perror("tcgetattr");
@@ -167,12 +167,10 @@ int main(int argc, char *argv[])
 
     printf("New termios structure set\n");
 
-    int bytes = sendSET();
+    sendSET();
 
     // Wait until all bytes have been written to the serial port
     sleep(1);
-
-    int byt_ptr = 0;
 
     while (STOP == FALSE)
     {
@@ -182,14 +180,11 @@ int main(int argc, char *argv[])
         startAlarm(3);
 
         // Returns after 5 chars have been input
-        while(byt_ptr != 5) {
-            int bytes_ = read(fd, buf, 1);
-            if (buf != 0 && bytes > -1) {
-                byt_ptr++;
-                int ans = verify_state(buf[0], fd);
-                if (ans == 1) {
-                    STOP = TRUE;
-                }
+        int bytes_ = read(fd, buf, 1);
+        if (buf != 0 && bytes_ > -1) {
+            int ans = verify_state(buf[0], fd);
+            if (ans == 1) {
+                STOP = TRUE;
             }
         }
     }
