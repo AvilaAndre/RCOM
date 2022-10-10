@@ -1,14 +1,15 @@
 // Link layer protocol implementation
 
-#include "link_layer.h"
-#include <fcntl.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <fcntl.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <termios.h>
+// #include <stdlib.h>
+// #include <sys/types.h>
+// #include <sys/stat.h>
 #include <unistd.h>
+#include "link_layer.h"
+#include "macros.h"
 
 // MISC
 #define BAUDRATE B38400
@@ -19,7 +20,6 @@
 
 #define BUF_SIZE 256
 
-volatile int STOP = FALSE;
 
 int fd;
 
@@ -32,19 +32,23 @@ struct termios newtio;
 ////////////////////////////////////////////////
 int llopen(LinkLayer connectionParameters)
 {
-    int fd = open(connectionParameters.serialPort ,O_RDWR | O_NOCTTY);
+    printf("Opening connection %s \n", connectionParameters.serialPort);
+
+    unsigned char SET[5] = {FLAG, A, C_SET, A^C_SET, FLAG};
+
+    fd = open(connectionParameters.serialPort, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
     if (fd < 0)
     {
         perror(connectionParameters.serialPort);
-        exit(-1);
+        return -1;
     }
 
-    // Save current port settings
+    // Save current port settingsS
     if (tcgetattr(fd, &oldtio) == -1)
     {
         perror("tcgetattr");
-        exit(-1);
+        return -1;
     }
 
     // Clear struct for new port settings
@@ -56,18 +60,26 @@ int llopen(LinkLayer connectionParameters)
 
     // Set input mode (non-canonical, no echo,...)
     newtio.c_lflag = 0;
-    newtio.c_cc[VTIME] = 1; // Inter-character timer unused
-    newtio.c_cc[VMIN] = 0;  // Blocking read until 5 chars received
-
+    newtio.c_cc[VTIME] = 0; // Inter-character timer unused
+    newtio.c_cc[VMIN] = 5;  // Blocking read until 5 chars received
     tcflush(fd, TCIOFLUSH);
 
     // Set new port settings
     if (tcsetattr(fd, TCSANOW, &newtio) == -1)
     {
         perror("tcsetattr");
-        exit(-1);
+        return -1;
     }
 
+    printf("New termios structure set\n");
+
+    if (connectionParameters.role == LlRx) {
+        receiverStart(fd);
+    } else {
+        senderStart(fd);
+    }
+
+    
     return 1;
 }
 
@@ -86,37 +98,7 @@ int llwrite(const unsigned char *buf, int bufSize)
 ////////////////////////////////////////////////
 int llread(unsigned char *packet)
 {
-    printf("New termios structure set\n");
-
-    // Loop for input
-    unsigned char buf[BUF_SIZE + 1] = {0}; // +1: Save space for the final '\0' char
-
-    //gets();
-
-    unsigned char * ch;   
-
-    int buf_pointer = 0; 
-
-    while (STOP == FALSE)
-    {
-        int bytes = read(fd, ch, 1);
-        printf("%d \n", bytes);
-        if (ch > 0) {
-            buf[buf_pointer] = (*ch);
-            buf_pointer++;
-            if ((*ch) =='\0') {
-                STOP = TRUE;
-            } else if (buf_pointer == 5) STOP = TRUE;
-        } else {
-            continue;
-        }
-
-        printf(":%s:%d\n", buf, bytes);
-    }
-    
-
-    int statistics = 0;
-    llclose(statistics);
+    // TODO
 
     return 0;
 }
@@ -129,7 +111,7 @@ int llclose(int showStatistics)
     if (tcsetattr(fd, TCSANOW, &oldtio) == -1)
     {
         perror("tcsetattr");
-        exit(-1);
+        return -1;
     }
 
     close(fd);
