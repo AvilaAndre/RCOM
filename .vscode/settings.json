@@ -4,6 +4,10 @@
         "application_layer.h": "c",
         "string.h": "c",
         "stdio.h": "c",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "state_machine.h": "c",
+        "receiver.h": "c",
+        "macros.h": "c",
+        "alarm.h": "c"
     }
 }

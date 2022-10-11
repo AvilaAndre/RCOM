@@ -1,23 +1,21 @@
+#include <unistd.h>
 #include "macros.h"
-
-volatile int STOP = 0;
-
-int byt_ptr = 0;
+#include "link_layer.h"
+#include "state_machine.h"
 
 unsigned char buf[BUF_SIZE] = {0};
 
-void receiverStart(int fd) {
+int receiverStart(int fd) { //TODO: this might not be correct. What happens after sending the UA?
 
-    while (STOP == FALSE)
-    {
+    while (1) {
         int bytes_ = read(fd, buf, 1);
         if (buf != 0 && bytes_ > -1) {
-            printf("Received %02x \n", buf[0]);
-            // /int ans = verify_state(buf[0], fd);
-            // if (ans == 1) {
-            //     STOP = TRUE;
-            // }
+            int ans = startVerifyState(buf[0], fd, LlRx);
+            if (ans == 1) {
+                return 1;
+            }
         }
         
     }
+    return 0;
 }

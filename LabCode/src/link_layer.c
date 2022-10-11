@@ -10,6 +10,8 @@
 #include <unistd.h>
 #include "link_layer.h"
 #include "macros.h"
+#include "sender.h"
+#include "receiver.h"
 
 // MISC
 #define BAUDRATE B38400
@@ -33,8 +35,6 @@ struct termios newtio;
 int llopen(LinkLayer connectionParameters)
 {
     printf("Opening connection %s \n", connectionParameters.serialPort);
-
-    unsigned char SET[5] = {FLAG, A, C_SET, A^C_SET, FLAG};
 
     fd = open(connectionParameters.serialPort, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
@@ -74,11 +74,10 @@ int llopen(LinkLayer connectionParameters)
     printf("New termios structure set\n");
 
     if (connectionParameters.role == LlRx) {
-        receiverStart(fd);
+        if (!receiverStart(fd)) return -1;
     } else {
-        senderStart(fd);
+        if (!senderStart(fd, connectionParameters.nRetransmissions, connectionParameters.timeout)) return -1;
     }
-
     
     return 1;
 }
