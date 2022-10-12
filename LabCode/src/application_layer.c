@@ -27,6 +27,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
 
     if (llopen(link) < 0) {
         printf("\nERROR: An error occurred while opening the connection. \n");
+        llclose(0);
         return;
     } else {
         printf("\nConnection estabilished. \n");
