@@ -1,12 +1,7 @@
-// Link layer protocol implementation
-
 #include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
 #include <termios.h>
-// #include <stdlib.h>
-// #include <sys/types.h>
-// #include <sys/stat.h>
 #include <unistd.h>
 #include "link_layer.h"
 #include "macros.h"
@@ -87,7 +82,9 @@ int llopen(LinkLayer connectionParameters)
 ////////////////////////////////////////////////
 int llwrite(const unsigned char *buf, int bufSize)
 {
-    // TODO
+    printf("\n");
+    for (int i = 0; i < bufSize; i++) printf("%02x ",buf[i]);
+    printf("\n");
 
     return 0;
 }

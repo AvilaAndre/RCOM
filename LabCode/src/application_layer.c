@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "application_layer.h"
 #include "link_layer.h"
+#include "macros.h"
 
 
 void applicationLayer(const char *serialPort, const char *role, int baudRate,
@@ -33,6 +34,18 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
         printf("\nConnection estabilished. \n");
     }
 
+    if (link.role == LlTx) {
+        //TODO: send file
+        // I'll start by sending random bits.
+        unsigned char buf[BUF_SIZE];
+
+        for(unsigned int i =0;i<BUF_SIZE;++i){
+            buf[i]=i;
+        }
+        llwrite(buf, BUF_SIZE);
+    } else {
+        //llread
+    }
 
     if (llclose(0) < 0) { //TODO: Discover what showStatistics means.
         printf("\n ERROR: An error occurred while closing the connection. \n");
