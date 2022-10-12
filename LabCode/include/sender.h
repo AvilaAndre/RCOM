@@ -1,3 +1,8 @@
+/**
+ * Sends the SET message.
+ * Returns:
+ * -> The number of bytes written.
+*/
 int sendSET();
 
 int senderReceive();
