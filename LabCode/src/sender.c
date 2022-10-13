@@ -5,7 +5,6 @@
 #include "state_machine.h"
 #include "alarm.h"
 #include "sender.h"
-#include "message.h"
 
 int thisfd;
 int nRetransmissions;

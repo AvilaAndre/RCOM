@@ -4,7 +4,8 @@
 #include "application_layer.h"
 #include "link_layer.h"
 #include "macros.h"
-
+#include "packet.h"
+#include <sys/stat.h>
 
 void applicationLayer(const char *serialPort, const char *role, int baudRate,
                       int nTries, int timeout, const char *filename)
@@ -38,7 +39,11 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
         //TODO: send file
         // I'll start by sending random bits.
 
-        sendControlPacket(filename);
+        struct stat file;
+        stat(filename, &file);
+        file.st_size;
+
+        getControlPacket(filename, file.st_size, 1);
 
 
         unsigned char buf[BUF_SIZE];
