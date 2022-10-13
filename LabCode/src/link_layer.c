@@ -80,11 +80,50 @@ int llopen(LinkLayer connectionParameters)
 ////////////////////////////////////////////////
 // LLWRITE
 ////////////////////////////////////////////////
+int ca = 0;
+
 int llwrite(const unsigned char *buf, int bufSize)
 {
-    printf("\n");
+    //Create Information Frame
+    unsigned char frame[BUF_SIZE] = {0};
+    //Set Flag
+    frame[0] = FLAG;
+    //Set Address
+    frame[1] = A;
+    //Set Alternating Control Address
+    if(ca == 0){
+        frame[2] == C_ZERO;
+    }
+    else{
+        frame[2] == C_ONE;
+    }
+    //Set BCC1
+    frame[3] = frame[1]^frame[2];
+    //Find BCC2
+    unsigned char bcc2 = 0x00;
+    for(int i = 0; i < bufSize; i++){
+        if(bcc2 = 0x00){
+            bcc2 = buf[i]^buf[i+1];
+            i++;
+        }
+        else{
+            bcc2 = bcc2^buf[i];
+        }
+    }
+    unsigned char tmp[bufSize+1] = buf 
+
+    }
+    
+    /*
+    unsigned char b[len + 1];
+    for(int i = 0; i < strlen(a); i++){
+        b[i] = a[i];
+    }
+    */
+
+    /*printf("\n");
     for (int i = 0; i < bufSize; i++) printf("%02x ",buf[i]);
-    printf("\n");
+    printf("\n");*/
 
     return 0;
 }

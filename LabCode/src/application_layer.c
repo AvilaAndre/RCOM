@@ -37,6 +37,10 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
     if (link.role == LlTx) {
         //TODO: send file
         // I'll start by sending random bits.
+
+        sendControlPacket(filename);
+
+
         unsigned char buf[BUF_SIZE];
 
         for(unsigned int i =0;i<BUF_SIZE;++i){

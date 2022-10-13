@@ -87,11 +87,6 @@ int verify_state(unsigned char val, int fd) {
 }
 
 
-// SET=[FLAG,A,C,BCC,FLAG]
-// SET = 0x7E | 0x03 | 0x03 | BCC | 0x7E
-
-
-
 int main(int argc, char *argv[])
 {
     // Program usage: Uses either COM1 or COM2

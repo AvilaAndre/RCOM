@@ -13,3 +13,16 @@
 #define C_DISC 0x0B //disconnect
 #define C_RR(n) 0x05 | (n>>7) //receiver ready / positive acknowledgement
 #define C_REJ(n) 0x01 | (n>>7) //reject / negative acknowledgment
+
+//Information Frame
+
+#define C_ZERO 0x00
+#define C_ONE 0x40
+
+//Packets
+
+#define C_DATA 0x01 // data packet
+#define C_START 0x02 // control packet
+#define C_END 0x03 // control packet
+#define T_SIZE 0x00 // control packet
+#define T_NAME 0x00 // control packet
