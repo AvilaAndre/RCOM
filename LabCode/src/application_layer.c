@@ -1,11 +1,12 @@
 // Application layer protocol implementation
 #include <string.h>
 #include <stdio.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include "application_layer.h"
 #include "link_layer.h"
 #include "macros.h"
 #include "packet.h"
-#include <sys/stat.h>
 
 void applicationLayer(const char *serialPort, const char *role, int baudRate,
                       int nTries, int timeout, const char *filename)
@@ -43,15 +44,35 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
         stat(filename, &file);
         file.st_size;
 
+        int file_fd;
+
+        if ((file_fd = open(filename, O_RDONLY)) < 0){
+            perror("Error opening file.");
+            return -1;
+        }
+
         getControlPacket(filename, file.st_size, 1);
 
-
-        unsigned char buf[BUF_SIZE];
-
-        for(unsigned int i =0;i<BUF_SIZE;++i){
-            buf[i]=i;
+        unsigned int counter = 0;
+        unsigned char *buf = malloc(128);
+        unsigned int bytes_to_send;
+        unsigned progress = 0;
+        
+        while ((bytes_to_send = read(file_fd, buf, PACKET_MAX_SIZE - 4)) > 0) {
+            //DEBUG-START: show what 
+            // printf("\n");
+            // for (int i = 0; i < bytes_to_send; i++) {
+            //     printf(" [%d/%d->%02x-%c]", i, bytes_to_send, buf[i], buf[i]);
+            // }
+            // printf("\n");
+            buf = getDataPacket(buf, bytes_to_send, counter);
+            bytes_to_send += 4;
+            //DEBUG-END
+            llwrite(buf, bytes_to_send);
         }
-        llwrite(buf, BUF_SIZE);
+
+
+
     } else {
         //llread
     }

@@ -36,7 +36,7 @@ unsigned char *getControlPacket(unsigned char *filename, int fileSize, int start
         strncat(packet, filename, filenameSize);
         size += filenameSize;
         sizePos = size;
-        packet[size] = 0x02; //T_SIZE
+        packet[size] = 0x02;
         packet[size + 1] = bytesForFileSize;
         size += 2; 
         for (int k = bytesForFileSize-1; k >= 0; k--) {
@@ -45,6 +45,27 @@ unsigned char *getControlPacket(unsigned char *filename, int fileSize, int start
         }
         size += bytesForFileSize;
         packet[sizePos] = T_SIZE;
+    }
+
+    return packet;
+}
+
+
+unsigned char *getDataPacket(unsigned char *fileData, unsigned int dataSize, unsigned int counter) {
+
+    int l1 = dataSize/256;
+    int l2 = dataSize%256;
+
+    
+
+    unsigned char *packet = malloc(4 + dataSize);
+
+    packet[0] = C_DATA;
+    packet[1] = counter % 256;
+    packet[2] = l1;
+    packet[3] = l2;
+    for (int k = 0; k < dataSize; k++) {
+        packet[4+k] = fileData[k];
     }
 
     return packet;

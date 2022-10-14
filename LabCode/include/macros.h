@@ -26,3 +26,5 @@
 #define C_END 0x03 // control packet
 #define T_SIZE 0x00 // control packet
 #define T_NAME 0x01 // control packet
+
+#define PACKET_MAX_SIZE 128
