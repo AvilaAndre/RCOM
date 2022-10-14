@@ -8,10 +8,10 @@
 
 
 int state = 0;
-unsigned char saved_chars[BUF_SIZE] = {};
+unsigned char savedChars[BUF_SIZE] = {};
 int ptr = 0;
 
-
+//TODO: return -1 on error
 int startVerifyState(unsigned char val, int fd, LinkLayerRole role) {  
     while (TRUE) {
         switch (state)
@@ -20,7 +20,7 @@ int startVerifyState(unsigned char val, int fd, LinkLayerRole role) {
             if (val == 0x7E) {
                 printf("log > Received flag \n");
                 state = 1;
-                saved_chars[ptr] = val;
+                savedChars[ptr] = val;
                 ptr++;
                 return 0;
             }
@@ -28,12 +28,12 @@ int startVerifyState(unsigned char val, int fd, LinkLayerRole role) {
         case 1:
             if (val != 0x7E) {
                 state = 2;
-                saved_chars[ptr] = val;
+                savedChars[ptr] = val;
                 ptr++;
                 return 0;
             }
         case 2:
-            saved_chars[ptr] = val;
+            savedChars[ptr] = val;
             ptr++;
             if (val == 0x7E){
                 state = 3;
@@ -41,7 +41,7 @@ int startVerifyState(unsigned char val, int fd, LinkLayerRole role) {
                 return 0;
             }
         case 3:
-            if (saved_chars[3] == (saved_chars[1]^saved_chars[2]) && ptr > 4) {
+            if (savedChars[3] == BCC(savedChars[1], savedChars[2]) && ptr > 4) {
                 state = 4;
             } else {
                 state = 0;
@@ -53,16 +53,16 @@ int startVerifyState(unsigned char val, int fd, LinkLayerRole role) {
             state = 0;
             ptr = 0;
             if (role == LlRx) {
-                if (saved_chars[2] == 0x03) {
-                    saved_chars[2] = 0x07;
-                    saved_chars[3] = saved_chars[1]^saved_chars[2];
-                    saved_chars[4] = 0x7E;
+                if (savedChars[2] == 0x03) {
+                    savedChars[2] = 0x07;
+                    savedChars[3] = BCC(savedChars[1],savedChars[2]);
+                    savedChars[4] = 0x7E;
                     printf("log > Sending UA \n");
-                    write(fd, saved_chars, BUF_SIZE);
+                    write(fd, savedChars, BUF_SIZE);
                     return 1;
                 }
             } else if (role == LlTx) {
-                if (saved_chars[2] == 0x07) {
+                if (savedChars[2] == 0x07) {
                     printf("log > Deactivating alarm. \n");
                     return 1;
                 }
@@ -75,3 +75,67 @@ int startVerifyState(unsigned char val, int fd, LinkLayerRole role) {
         return 0;
     }
 }
+
+
+//TODO: merge with function on top ↑ ↑
+
+
+enum mst {
+    START,
+    AWAITING_FLAG,
+    AWAITING_ADDRESS,
+    AWAITING_CONTROL,
+    AWAITING_BCC,
+    RECEIVING_PACKET_TYPE,
+    RECEIVING_DATA,
+    RECEIVING_CONTROL,
+    AWAITING_LAST_BCC,
+    AWAITING_LAST_FLAG
+} typedef MACHINE_STATE;
+
+MACHINE_STATE dataState = AWAITING_FLAG;
+
+int dataptr = 0;
+unsigned char dataSavedChars[PACKET_MAX_SIZE] = {0};
+int dataBit = 0;
+
+
+int dataStateMachine(unsigned char byte, int fd, LinkLayerRole role) {
+    while (TRUE) {
+        switch (dataState)
+        {
+            case START:
+                return -1;
+            case AWAITING_FLAG:
+                if (byte == FLAG) {
+                    dataState = AWAITING_ADDRESS;
+                    savedChars[dataptr] = byte;
+                    return 0;
+                }
+                return 0;
+            case AWAITING_ADDRESS: 
+                if (byte != FLAG) {
+                    dataptr++;
+                    dataState = AWAITING_BCC;
+                    savedChars[dataptr++] = byte;
+                    return 0;
+                }
+            case AWAITING_CONTROL: 
+                dataState = AWAITING_BCC;
+                savedChars[dataptr++] = byte;
+                return 0;
+            case AWAITING_BCC:
+                if (byte == BCC(savedChars[2], savedChars[1])) {
+                    dataState = RECEIVING_DATA;
+                    savedChars[dataptr++] = byte;
+                    return 0;
+                } else {
+                    dataState = AWAITING_FLAG;
+                    dataptr = 0;
+                    return -1;
+                }
+            case RECEIVING_DATA:
+
+        }
+    }
+} 

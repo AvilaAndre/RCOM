@@ -68,8 +68,8 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
             //     printf(" [%d/%d->%02x-%c]", i, bytes_to_send, buf[i], buf[i]);
             // }
             // printf("\n");
-            bytes_to_send = getDataPacket(buf, bytes_to_send, counter, &buf);
             //DEBUG-END
+            bytes_to_send = getDataPacket(buf, bytes_to_send, counter, &buf); // counter logic
             llwrite(buf, bytes_to_send);
         }
 

@@ -5,3 +5,7 @@
  * 0 -> Has not (yet) found a correct message. 
 */
 int startVerifyState(unsigned char val, int fd, LinkLayerRole role);
+
+
+//TODO: Document this.
+int dataStateMachine(unsigned char val, int fd, LinkLayerRole role);

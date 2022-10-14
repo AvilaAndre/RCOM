@@ -14,6 +14,8 @@
 #define C_RR(n) 0x05 | (n>>7) //receiver ready / positive acknowledgement
 #define C_REJ(n) 0x01 | (n>>7) //reject / negative acknowledgment
 
+#define BCC(a, c) (a^c)
+
 //Information Frame
 
 #define C_ZERO 0x00
