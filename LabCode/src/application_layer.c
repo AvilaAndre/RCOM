@@ -38,7 +38,6 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
 
     if (link.role == LlTx) {
         //TODO: send file
-        // I'll start by sending random bits.
 
         struct stat file;
         stat(filename, &file);
@@ -48,14 +47,18 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
 
         if ((file_fd = open(filename, O_RDONLY)) < 0){
             perror("Error opening file.");
-            return -1;
+            llclose(0);
+            return;
         }
 
-        getControlPacket(filename, file.st_size, 1);
+        unsigned int bytes_to_send;
+        unsigned char *buf[PACKET_MAX_SIZE] = {0};
+
+        bytes_to_send = getControlPacket(filename, file.st_size, TRUE, buf);
+
+        llwrite(buf, bytes_to_send);
 
         unsigned int counter = 0;
-        unsigned char *buf = malloc(128);
-        unsigned int bytes_to_send;
         unsigned progress = 0;
         
         while ((bytes_to_send = read(file_fd, buf, PACKET_MAX_SIZE - 4)) > 0) {
@@ -65,8 +68,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
             //     printf(" [%d/%d->%02x-%c]", i, bytes_to_send, buf[i], buf[i]);
             // }
             // printf("\n");
-            buf = getDataPacket(buf, bytes_to_send, counter);
-            bytes_to_send += 4;
+            bytes_to_send = getDataPacket(buf, bytes_to_send, counter, &buf);
             //DEBUG-END
             llwrite(buf, bytes_to_send);
         }
