@@ -41,7 +41,6 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
 
         struct stat file;
         stat(filename, &file);
-        file.st_size;
 
         int file_fd;
 
@@ -51,32 +50,57 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
             return;
         }
 
-        unsigned int bytes_to_send;
-        unsigned char *buf[PACKET_MAX_SIZE] = {0};
+        unsigned int bytesToSend;
+        unsigned char buf[PACKET_MAX_SIZE] = {0};
 
-        bytes_to_send = getControlPacket(filename, file.st_size, TRUE, buf);
+        bytesToSend = getControlPacket(filename, file.st_size, TRUE, buf);
 
-        llwrite(buf, bytes_to_send);
+        llwrite(buf, bytesToSend);
 
         unsigned int counter = 0;
-        unsigned progress = 0;
-        
-        while ((bytes_to_send = read(file_fd, buf, PACKET_MAX_SIZE - 4)) > 0) {
-            //DEBUG-START: show what 
-            // printf("\n");
-            // for (int i = 0; i < bytes_to_send; i++) {
-            //     printf(" [%d/%d->%02x-%c]", i, bytes_to_send, buf[i], buf[i]);
-            // }
-            // printf("\n");
-            //DEBUG-END
-            bytes_to_send = getDataPacket(buf, bytes_to_send, counter, &buf); // counter logic
-            llwrite(buf, bytes_to_send);
+        int count = 0;
+        while ((bytesToSend = read(file_fd, buf, PACKET_MAX_SIZE-4)) > 0) {
+            count += bytesToSend;
+            bytesToSend = getDataPacket(&buf, bytesToSend, counter); // TODO: counter logic
+
+            llwrite(buf, bytesToSend);
+
+            printf("Sending... %d%% sent. \n",(int) (((double)count / (double)file.st_size) *100));
+            //debugEND
         }
 
 
 
     } else {
-        //llread
+        int *fileToWrite = -1;
+
+        unsigned char *buf[PACKET_MAX_SIZE] = {0};
+        llread(&buf);
+        unsigned int packetSize = 0;
+
+        switch (handlePacket(&buf, &packetSize)) {
+            case 0:
+                perror("Error handling packet.");
+                llclose(0);
+                return;
+            case 1:
+                if (fileToWrite == -1) {
+                    perror("No file to write initialized.");
+                    return;
+                }
+                // Writing to file
+                for (int j = 0; j < packetSize; j++) {
+                    fputc(buf[j], fileToWrite);
+                }
+                break;
+            case 2:
+                printf("Start ControlPacket: %s %d %d\n", buf, strlen(buf), packetSize);
+                fileToWrite =  fopen(filename, "w+");
+                break;
+            case 3:
+                printf("End ControlPacket: %s %d %d\n", buf, strlen(buf), packetSize);
+                break;
+        }
     }
 
     if (llclose(0) < 0) { //TODO: Discover what showStatistics means.

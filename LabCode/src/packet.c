@@ -24,7 +24,7 @@ unsigned int getControlPacket(unsigned char *filename, int fileSize, int start, 
 
     bytesForFileSize = bytesForFileSize/2;
 
-    unsigned int bytes_to_send = 3+ bytesForFilenameSize + filenameSize + bytesForFileSize;
+    unsigned int bytesToSend = 3+ bytesForFilenameSize + filenameSize + bytesForFileSize;
 
     int size = 0;
     int sizePos = 0;
