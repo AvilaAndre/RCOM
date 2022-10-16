@@ -36,11 +36,9 @@ unsigned int getControlPacket(unsigned char *filename, int fileSize, int start, 
     packet[size + 1] = T_NAME;
     packet[size + 2] = strlen(filename);
     size += 2 + bytesForFilenameSize;
-    for (int i = 0; i < bytesForFilenameSize; i++) {
+    for (int i = 0; i < strlen(filename); i++) {
         packet[3 + i] = filename[i];
-        printf("%02x %c \n", filename[i], filename[i]);
     }
-    printf("size: %d \n", filenameSize);
     strncat(packet, filename, filenameSize);
     size += filenameSize;
     sizePos = size;
@@ -53,15 +51,12 @@ unsigned int getControlPacket(unsigned char *filename, int fileSize, int start, 
     size += bytesForFileSize;
     packet[sizePos] = T_SIZE;
 
-    for (int i = 0; i < size; i++) {
-        //printf("%d -> %02X %c \n", i, packet[i], packet[i]);
-    }
-
     return size;
 }
 
 
-unsigned int getDataPacket(unsigned char *fileData, unsigned int dataSize, unsigned int counter, unsigned char *packet) {
+unsigned int getDataPacket(unsigned char *fileData, unsigned int dataSize, unsigned int counter) {
+    unsigned char packet[PACKET_MAX_SIZE] = {0};
 
     int l1 = dataSize/256;
     int l2 = dataSize%256;
@@ -73,12 +68,14 @@ unsigned int getDataPacket(unsigned char *fileData, unsigned int dataSize, unsig
     for (int k = 0; k < dataSize; k++) {
         packet[4+k] = fileData[k];
     }
+    for (int k = 0; k < (dataSize+4); k++) {
+        fileData[k] = packet[k];
+    }
 
     return dataSize + 4;
 }
 
 unsigned int handlePacket(unsigned char *packet, unsigned int *size) {
-    printf("handlePacket called \n"); //TODO: remove this line
     unsigned int counter = 0;
     unsigned int nameSize = 0;
     unsigned int sizeSize = 0;
@@ -163,8 +160,10 @@ unsigned int handlePacket(unsigned char *packet, unsigned int *size) {
         return 3;
     case C_DATA:
         counter = packet[1];
-        size = packet[2] * 256 + packet[3];
-        packet += 4;
+        (*size) = packet[2] * 256 + packet[3];
+        for (int j = 0; j < (*size); j++) {
+            packet[j] = packet[j + 4];
+        }
         return 1;
     
     default:

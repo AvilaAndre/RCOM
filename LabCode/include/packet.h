@@ -6,7 +6,7 @@ unsigned int getControlPacket(unsigned char *filename, int fileSize, int start, 
 /**
  * Receives fileData as a parameter as well as the counter, creating a data packet that is returned through reference and returning the amount of bytes on the packet.
 */
-unsigned int getDataPacket(unsigned char *fileData, unsigned int dataSize, unsigned int counter, unsigned char *packet);
+unsigned int getDataPacket(unsigned char *fileData, unsigned int dataSize, unsigned int counter);
 
 /**
  * Handles a packet, returning the type of packet and returning the packet through reference as well as the size of the packet.
