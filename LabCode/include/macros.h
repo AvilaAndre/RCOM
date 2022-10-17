@@ -30,3 +30,10 @@
 #define T_NAME 0x01 // control packet
 
 #define PACKET_MAX_SIZE 128
+
+//Stuffing
+
+#define MSG_FLAG 0x7E
+#define MSG_ESCAPE_BYTE 0x7D
+#define MSG_FLAG_STUFFING_BYTE 0x5E
+#define MSG_ESCAPE_STUFFING_BYTE 0x5D 

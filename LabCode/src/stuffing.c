@@ -1,22 +1,29 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 #include "macros.h"
-#include "link_layer.h"
-#include "state_machine.h"
-#include "alarm.h"
-#include "sender.h"
-#include "message.h"
 
 int stuffing(unsigned char *data)
-{
+{    
     unsigned char newdata[BUF_SIZE];
-    for(int i = 0; strlen(data); i++)
+    //stores the last position in where newdata was updated
+    int newDataPosition = 0;
+    for(int i = 0; i < strlen(data); i++)
     {
-        if(data[i] == 0x7E) strncat(newdata,(unsigned char)0x7D5E, 2);
-        else if(data[i] == 0x7D) strncat(newdata,(unsigned char)0x7D5D, 2);
-        else strncat(newdata,data[i],1);
-    }
-
-    *data = newdata;
+        if(data[i] == MSG_FLAG) 
+        {
+            newdata[newDataPosition++] = MSG_ESCAPE_BYTE;
+            newdata[newDataPosition++] = MSG_FLAG_STUFFING_BYTE;
+        }
+        else if(data[i] == MSG_ESCAPE_BYTE) 
+        {
+            newdata[newDataPosition++] = MSG_ESCAPE_BYTE;
+            newdata[newDataPosition++] = MSG_ESCAPE_STUFFING_BYTE;
+           
+        }       
+        else newdata[newDataPosition++] = data[i];
+    } 
+    for(int i = 0; i < BUF_SIZE; i++)
+    data[i] = newdata[i];
     return 0;
 }
