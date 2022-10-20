@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <string.h>
 #include "macros.h"
+#include "stuffing.h"
 
 int stuffing(unsigned char *data)
 {    

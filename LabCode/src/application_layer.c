@@ -56,6 +56,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
         bytesToSend = getControlPacket(filename, file.st_size, TRUE, buf);
 
         llwrite(buf, bytesToSend);
+        return -1;
 
         unsigned int counter = 0;
         int count = 0;
