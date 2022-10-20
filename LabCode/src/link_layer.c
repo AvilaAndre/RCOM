@@ -23,6 +23,8 @@ int fd;
 struct termios oldtio;
 struct termios newtio;
 
+LinkLayer connectionInfo;
+
 
 ////////////////////////////////////////////////
 // LLOPEN
@@ -73,6 +75,8 @@ int llopen(LinkLayer connectionParameters)
     } else {
         if (!senderStart(fd, connectionParameters.nRetransmissions, connectionParameters.timeout)) return -1;
     }
+
+    connectionInfo = connectionParameters;
     
     return 1;
 }
@@ -85,7 +89,7 @@ int ca = 0;
 int llwrite(const unsigned char *buf, int bufSize)
 {
     //Create Information Frame
-    unsigned char frame[PACKET_MAX_SIZE + 6] = {0};
+    unsigned char frame[2*PACKET_MAX_SIZE + 6] = {0};
     
     int frameSize = buildInformationFrame(&frame, buf, bufSize, ca);
 
@@ -93,6 +97,9 @@ int llwrite(const unsigned char *buf, int bufSize)
     for (int i = 0; i < frameSize; i++) printf("%02x", frame[i]);
     printf("\n");
     printf("\n%d\n", frameSize);
+
+    if (senderInformationSend(frame, frameSize, connectionInfo.nRetransmissions, connectionInfo.timeout) == 0) return -1;
+
 
     if (frameSize < 0) return -1; // A error occurred during frame building.
 }

@@ -56,7 +56,6 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
         bytesToSend = getControlPacket(filename, file.st_size, TRUE, buf);
 
         llwrite(buf, bytesToSend);
-        return -1;
 
         unsigned int counter = 0;
         int count = 0;
@@ -64,7 +63,11 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
             count += bytesToSend;
             bytesToSend = getDataPacket(&buf, bytesToSend, counter); // TODO: counter logic
 
-            llwrite(buf, bytesToSend);
+            if (llwrite(buf, bytesToSend) < 0) {
+                printf("Failed to send information frame\n");
+                llclose(0);
+                return -1;
+            }
 
             printf("Sending... %d%% sent. \n",(int) (((double)count / (double)file.st_size) *100));
             //debugEND
