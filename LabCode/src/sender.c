@@ -36,22 +36,21 @@ int senderReceive() {
     return 0;
 }
 
-void senderAlarmHandler(int signal) {
-    alarmEnabled = FALSE;
-    alarmCount++;
-    sendSET();
-    nRetransmissions--;
-    printf("Alarm #%d\n", alarmCount);
-}
 
 int senderStart(int newfd, int newNRetransmissions, int timeout) {
     thisfd = newfd;
     nRetransmissions = newNRetransmissions;
-    sendSET();
     while (nRetransmissions > 0) {
-        startAlarm(timeout, senderAlarmHandler);
 
-        if (senderReceive(thisfd) == 1) return 1; 
+
+        if (!alarmEnabled) {
+            sendSET();
+            nRetransmissions--;
+            startAlarm(timeout);
+        }
+
+
+        if (senderReceive() == 1) return 1; 
     }
     return 0;
 }
@@ -71,6 +70,8 @@ int buildInformationFrame(unsigned char *frame, unsigned char packet[], int pack
     }
     //Set BCC1
     frame[3] = frame[1]^frame[2];
+
+    unsigned char newPacket[PACKET_MAX_SIZE*2+2] = {0};
     //Find BCC2
     unsigned char bcc2 = 0x00;
     for(int i = 0; i < packetSize; i++){
@@ -81,15 +82,61 @@ int buildInformationFrame(unsigned char *frame, unsigned char packet[], int pack
         else if (i > 1){
             bcc2 = bcc2^packet[i];
         }
-        frame[frameSize++] = packet[i];
+        newPacket[i] = packet[i];
     }
-    frame[frameSize++] = bcc2;
+
+    newPacket[packetSize+1] = bcc2;
+
+    packetSize = stuffing(newPacket, packetSize+1);
+
+    for (int i = 0; i < packetSize; i++)
+    {
+        frame[frameSize++] = newPacket[i];
+    }
+    
+
     frame[frameSize++] = FLAG;
 
-    printf("\n");
-    for (int i = 0; i < frameSize; i++) printf("%02x", frame[i]);
-    printf("\n");
-    printf("\n%d\n", frameSize);
-
     return frameSize;
+}
+
+
+int sendFrame(unsigned char frameToSend[], int frameToSendSize) { 
+    int bytes = write(thisfd, frameToSend, frameToSendSize);
+    printf("Information frame sent, %d bytes written\n", bytes);
+    return bytes;
+}
+
+
+int senderInformationReceive() {
+
+    unsigned char buf[BUF_SIZE] = {0};
+
+    int bytes_ = read(thisfd, buf, 1);
+    if (buf != 0 && bytes_ > -1) {
+        /* int ans = dataAnswerState(buf[0], thisfd, LlTx); //TODO: this
+        if (ans == 1) {
+            killAlarm();
+            return 1;
+        }*/
+        return 1;
+    }
+
+    return 0;
+}
+
+
+int senderInformationSend(unsigned char frameToSend[], int frameToSendSize, int newNRetransmissions, int timeout) {
+    nRetransmissions = newNRetransmissions;
+    while (nRetransmissions > 0) {
+
+        if (!alarmEnabled) {
+            sendFrame(frameToSend, frameToSendSize);
+            nRetransmissions--;
+            startAlarm(timeout);
+        }
+
+        if (senderInformationReceive() == 1) return 1;  // TODO:  
+    }
+    return 0;
 }

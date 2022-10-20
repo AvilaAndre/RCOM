@@ -8,4 +8,4 @@ void killAlarm();
 
 void alarmHandler(int signal);
 
-int startAlarm(unsigned int duration, void (*alarmHandle)());
+int startAlarm(unsigned int duration);
