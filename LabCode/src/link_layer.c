@@ -133,7 +133,10 @@ int llwrite(const unsigned char *buf, int bufSize)
 ////////////////////////////////////////////////
 int llread(unsigned char *packet)
 {
-    // TODO
+    int num_tries, ret;
+
+    //Exits when it receives a DISC
+    ret = receiverStart(fd, dyn_buffer);
 
     return 0;
 }
