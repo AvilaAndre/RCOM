@@ -4,12 +4,12 @@
 #include "macros.h"
 #include "stuffing.h"
 
-int stuffing(unsigned char *data)
+int stuffing(unsigned char *data, int dataSize)
 {    
-    unsigned char newdata[BUF_SIZE];
+    unsigned char newdata[PACKET_MAX_SIZE*2+2];
     //stores the last position in where newdata was updated
     int newDataPosition = 0;
-    for(int i = 0; i < strlen(data); i++)
+    for(int i = 0; i < dataSize; i++)
     {
         if(data[i] == MSG_FLAG) 
         {
@@ -24,7 +24,7 @@ int stuffing(unsigned char *data)
         }       
         else newdata[newDataPosition++] = data[i];
     } 
-    for(int i = 0; i < BUF_SIZE; i++)
+    for(int i = 0; i < newDataPosition; i++)
     data[i] = newdata[i];
-    return 0;
+    return newDataPosition;
 }

@@ -1,1 +1,1 @@
-int stuffing(unsigned char *data);
+int stuffing(unsigned char *data, int dataSize);
