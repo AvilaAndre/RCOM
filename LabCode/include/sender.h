@@ -7,8 +7,6 @@ int sendSET();
 
 int senderReceive();
 
-void senderAlarmHandler(int signal);
-
 /**
  * Sends the SET message and waits for the response every -timeout- seconds for a maximum of -newNRetransmissions- times.
  * 
@@ -26,3 +24,11 @@ int senderStart(int newfd, int newNRetransmissions, int timeout);
  * >0 -> Size of frame
 */
 int buildInformationFrame(unsigned char *frame, unsigned char packet[], int packetSize,  unsigned int ca);
+
+
+int sendFrame(unsigned char frameToSend[], int frameToSendSize);
+
+int senderInformationReceive();
+
+
+int senderInformationSend(unsigned char frameToSend[], int frameToSendSize, int newNRetransmissions, int timeout);
