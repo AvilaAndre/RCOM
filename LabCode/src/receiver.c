@@ -20,3 +20,15 @@ int receiverStart(int fd) { //TODO: this might not be correct. What happens afte
     }
     return 0;
 }
+
+int receiverRead(int fd)
+{
+    unsigned char byte;
+
+    while(1)
+    {
+        ret = read(fd,&byte,1);
+        dataStateMachine(byte,fd,???);
+
+    }
+}

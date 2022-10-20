@@ -7,6 +7,7 @@
 #include "macros.h"
 #include "sender.h"
 #include "receiver.h"
+#include <time.h>
 
 // MISC
 #define BAUDRATE B38400
@@ -22,13 +23,14 @@ int fd;
 
 struct termios oldtio;
 struct termios newtio;
-
+clock_t start;
 
 ////////////////////////////////////////////////
 // LLOPEN
 ////////////////////////////////////////////////
 int llopen(LinkLayer connectionParameters)
 {
+    start = clock();
     printf("Opening connection %s \n", connectionParameters.serialPort);
 
     fd = open(connectionParameters.serialPort, O_RDWR | O_NOCTTY | O_NONBLOCK);
@@ -105,7 +107,7 @@ int llread(unsigned char *packet)
     int num_tries, ret;
 
     //Exits when it receives a DISC
-    ret = receiverStart(fd, dyn_buffer);
+    ret = receiverRead(fd);
 
     return 0;
 }
@@ -115,6 +117,12 @@ int llread(unsigned char *packet)
 ////////////////////////////////////////////////
 int llclose(int showStatistics)
 {
+    if(showStatistics)
+    {
+        double cpu_time_used = ((double) (clock() - start)) / CLOCKS_PER_SEC * 1000; //in miliseconds
+        printf("The application took %f miliseconds to execute \n", cpu_time_used);
+    }
+
     if (tcsetattr(fd, TCSANOW, &oldtio) == -1)
     {
         perror("tcsetattr");
