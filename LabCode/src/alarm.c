@@ -14,7 +14,15 @@ void killAlarm() {
 }
 
 
-int startAlarm(unsigned int duration, void (*alarmHandler)())
+void alarmHandler(int signal) {
+    alarmEnabled = FALSE;
+    alarmCount++;
+    printf("Alarm #%d\n", alarmCount);
+}
+
+
+
+int startAlarm(unsigned int duration)
 {
     (void)signal(SIGALRM, alarmHandler);
 
