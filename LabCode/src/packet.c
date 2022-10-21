@@ -83,7 +83,7 @@ unsigned int handlePacket(unsigned char *packet, unsigned int *size) {
     switch (packet[0])
     {
     case C_START:
-        if (packet[1*8] == T_SIZE) { // Avila: By my code this situation will never happen tbh.
+        if (packet[1*8] == T_SIZE) {
             sizeSize = packet[2*8];
             unsigned int newSize = 0;
             int i = 0;

@@ -34,7 +34,9 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
         return;
     } else {
         printf("\nConnection estabilished. \n");
+
     }
+    
 
     if (link.role == LlTx) {
         //TODO: send file
@@ -55,7 +57,11 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
 
         bytesToSend = getControlPacket(filename, file.st_size, TRUE, buf);
 
-        llwrite(buf, bytesToSend);
+        if (llwrite(buf, bytesToSend) < 0) {
+            printf("Failed to send information frame\n");
+            llclose(0);
+            return -1;
+        }
 
         unsigned int counter = 0;
         int count = 0;
@@ -80,6 +86,12 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
         unsigned char *buf[PACKET_MAX_SIZE] = {0};
         while (TRUE) {
             int readResponse = llread(&buf);
+
+            if (readResponse == -1) {
+                perror("An error occured during llread.");
+                llclose(0);
+                return;
+            }
             
             unsigned int packetSize = 0;
 

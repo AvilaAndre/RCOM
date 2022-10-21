@@ -6,7 +6,7 @@
 
 int stuffing(unsigned char *data, int dataSize)
 {    
-    unsigned char newdata[PACKET_MAX_SIZE*2+2];
+    unsigned char newdata[PACKET_MAX_SIZE*2+2] = {0};
     //stores the last position in where newdata was updated
     int newDataPosition = 0;
     for(int i = 0; i < dataSize; i++)
@@ -24,7 +24,6 @@ int stuffing(unsigned char *data, int dataSize)
         }       
         else newdata[newDataPosition++] = data[i];
     } 
-    for(int i = 0; i < newDataPosition; i++)
-    data[i] = newdata[i];
+    for(int i = 0; i < newDataPosition; i++) data[i] = newdata[i];
     return newDataPosition;
 }

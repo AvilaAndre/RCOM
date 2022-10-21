@@ -3,11 +3,12 @@
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
+#include <time.h>
 #include "link_layer.h"
 #include "macros.h"
 #include "sender.h"
 #include "receiver.h"
-#include <time.h>
+#include "state_machine.h"
 
 // MISC
 #define BAUDRATE B38400
@@ -96,11 +97,6 @@ int llwrite(const unsigned char *buf, int bufSize)
     
     int frameSize = buildInformationFrame(&frame, buf, bufSize, ca);
 
-    printf("\n>");
-    for (int i = 0; i < frameSize; i++) printf("%02x", frame[i]);
-    printf("\n");
-    printf("\n%d\n", frameSize);
-
     if (senderInformationSend(frame, frameSize, connectionInfo.nRetransmissions, connectionInfo.timeout) == 0) return -1;
 
 
@@ -113,27 +109,45 @@ int llwrite(const unsigned char *buf, int bufSize)
 int llread(unsigned char *packet)
 {
     printf("Entered llread \n");
+    int a = 0;
+    unsigned char buf[1] = {0};
 
-    unsigned char buf[1];
+
+    int stuffing = FALSE;
+    int packetSize = 0;
+    unsigned char readPacket[PACKET_MAX_SIZE] = {0};
+
     while (TRUE) {
         int bytes_ = read(fd, &buf, 1);
         if (buf != 0 && bytes_ > -1) {
-        printf("llread read %02x", buf);
             int ans = dataStateMachine(buf[0], fd, LlRx);
-            if (ans == 1) {
-                return 1;
+            switch (ans)
+            {
+            case -1:
+                return -1;
+                break;
+            case 1:
+                //verificar
+                for (int i = 0; i < packetSize-1; i++) {
+                    packet[i*8] = readPacket[i];
+                }
+                return packetSize-1;
+                break;
+            case 2:
+                if (stuffing) {
+                    stuffing = FALSE;
+                } else {
+                    readPacket[packetSize++] = buf[0];
+                }
+                break;
+            case 3:
+                stuffing = TRUE;
+                break;
+            default:
+                break;
             }
         }
     }
-
-    // if(ret != 0)
-    // {
-    //     fprintf(stderr, "Receiver: Timed out in reading!\n");
-    //     return -1;
-    // } else {
-    //     printf("aaaa %02x \n", ret);
-    // }
-
     return 0;
 }
 

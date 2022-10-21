@@ -75,6 +75,7 @@ int buildInformationFrame(unsigned char *frame, unsigned char packet[], int pack
     //Find BCC2
     unsigned char bcc2 = 0x00;
     for(int i = 0; i < packetSize; i++){
+        newPacket[i] = packet[i];
         if(i == 1){
             bcc2 = packet[i-1]^packet[i];
             i++;
@@ -82,7 +83,6 @@ int buildInformationFrame(unsigned char *frame, unsigned char packet[], int pack
         else if (i > 1){
             bcc2 = bcc2^packet[i];
         }
-        newPacket[i] = packet[i];
     }
 
     newPacket[packetSize+1] = bcc2;
@@ -103,6 +103,9 @@ int buildInformationFrame(unsigned char *frame, unsigned char packet[], int pack
 
 int sendFrame(unsigned char frameToSend[], int frameToSendSize) { 
     int bytes = write(thisfd, frameToSend, frameToSendSize);
+    printf("\n");
+    for (int i = 0; i < frameToSendSize; i++) printf("%02x", frameToSend[i]);
+    printf("\n");
     printf("Information frame sent, %d bytes written\n", bytes);
     return bytes;
 }
@@ -135,8 +138,8 @@ int senderInformationSend(unsigned char frameToSend[], int frameToSendSize, int 
             nRetransmissions--;
             startAlarm(timeout);
         }
-
-        if (senderInformationReceive() == 1) return 1;  // TODO:  
+        sleep(1);
+        //if (senderInformationReceive() == 1) return 1;  // TODO:  
     }
     return 0;
 }
