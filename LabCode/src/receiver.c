@@ -21,57 +21,6 @@ int receiverStart(int fd) { //TODO: this might not be correct. What happens afte
     return 0;
 }
 
-int receiverRead(int fd)
-{
-    unsigned char byte;
-    int timeOutCounter = 0;
-    const int MAX_TRIES = 3;
-
-    while(1)
-    {
-        ret = read(fd,&byte,1);
-
-        //if no byte was read or error occurred
-        if (ret <= 0) {
-            if(time_out_counter < MAX_TRIES) {
-                //reset state machine for safety
-                //resetStateMachine();??
-                time_out_counter++;
-                //try again
-                continue;
-            } else {
-                return -1;
-            }
-        } else {
-            time_out_counter = 0;
-        }
-
-        dataStateMachine(byte,fd,LlRx);
-        //pseudocode because state machine is not done yet
-        //case for success
-        //alternating between supervision message and info message 0x00 and 0x40
-        if(getState() == supervisionMessageOK)
-        {
-            return 0;
-        }
-
-        else if(getState() == infoMessageOK)
-        {
-            //if RR correct
-
-            //else write correct RR
-
-
-        }
-
-        else if(getState() == infoError)
-        {
-            //resetStateMachine
-            //write error
-        }
-    }
-}
-
 int readSupervisionMessage(int fd) {
  /*   //resetMsgState()
     byte msg_byte;
@@ -92,3 +41,4 @@ int readSupervisionMessage(int fd) {
     }
     */
     return 0;
+}

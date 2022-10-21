@@ -70,7 +70,6 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
             }
 
             printf("Sending... %d%% sent. \n",(int) (((double)count / (double)file.st_size) *100));
-            //debugEND
         }
 
 
@@ -79,31 +78,36 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
         int *fileToWrite = -1;
 
         unsigned char *buf[PACKET_MAX_SIZE] = {0};
-        llread(&buf);
-        unsigned int packetSize = 0;
+        while (TRUE) {
+            int readResponse = llread(&buf);
+            
+            unsigned int packetSize = 0;
 
-        switch (handlePacket(&buf, &packetSize)) {
-            case 0:
-                perror("Error handling packet.");
-                llclose(0);
-                return;
-            case 1:
-                if (fileToWrite == -1) {
-                    perror("No file to write initialized.");
-                    return;
-                }
-                // Writing to file
-                for (int j = 0; j < packetSize; j++) {
-                    fputc(buf[j], fileToWrite);
-                }
-                break;
-            case 2:
-                printf("Start ControlPacket: %s %d %d\n", buf, strlen(buf), packetSize);
-                fileToWrite =  fopen(filename, "w+");
-                break;
-            case 3:
-                printf("End ControlPacket: %s %d %d\n", buf, strlen(buf), packetSize);
-                break;
+            switch (handlePacket(&buf, &packetSize)) {
+                case 0:
+                    //perror("Error handling packet.");
+                    printf("Error handling packet.");
+                    //llclose(0);
+                    //return;
+                    break;
+                case 1:
+                    if (fileToWrite == -1) {
+                        perror("No file to write initialized.");
+                        return;
+                    }
+                    // Writing to file
+                    for (int j = 0; j < packetSize; j++) {
+                        fputc(buf[j], fileToWrite);
+                    }
+                    break;
+                case 2:
+                    printf("Start ControlPacket: %s %d %d\n", buf, strlen(buf), packetSize);
+                    fileToWrite =  fopen(filename, "w+");
+                    break;
+                case 3:
+                    printf("End ControlPacket: %s %d %d\n", buf, strlen(buf), packetSize);
+                    break;
+            }
         }
     }
 

@@ -89,7 +89,7 @@ enum mst {
     RECEIVING_PACKET_TYPE,
     RECEIVING_DATA_COUNTER,
     RECEIVING_CONTROL_T,
-    RECEVING_CONTROL_L,
+    RECEIVING_CONTROL_L,
     RECEIVING_DATA_L1,
     RECEIVING_DATA_L2,
     RECEIVING_DATA,
@@ -106,8 +106,8 @@ int dataBit = 0;
 int pdataptr = 0;
 int dataSize = 0;
 int packetSize = 0;
-bool stufFlag = FALSE;
-bool t2 = FALSE;
+int stufFlag = FALSE;
+int t2 = FALSE;
 
 int dataStateMachine(unsigned char byte, int fd, LinkLayerRole role) {
     while (TRUE) {
@@ -164,7 +164,7 @@ int dataStateMachine(unsigned char byte, int fd, LinkLayerRole role) {
                 }
             case RECEIVING_CONTROL_T:
                 if(byte == T_SIZE || byte == T_NAME){
-                    dataState = RECEVING_CONTROL_L;
+                    dataState = RECEIVING_CONTROL_L;
                     savedChars[dataptr] = byte;
                     dataSavedChars[dataptr] = byte;
                 }

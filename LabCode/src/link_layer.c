@@ -112,33 +112,27 @@ int llwrite(const unsigned char *buf, int bufSize)
 ////////////////////////////////////////////////
 int llread(unsigned char *packet)
 {
-    int num_tries, ret;
+    printf("Entered llread \n");
 
-    //Exits when it receives a DISC
-    ret = receiverRead(fd);
-    if(ret != 0)
-    {
-        fprintf(stderr, "Receiver: Timed out in reading!\n");
-        return -1;
+    unsigned char buf[1];
+    while (TRUE) {
+        int bytes_ = read(fd, &buf, 1);
+        if (buf != 0 && bytes_ > -1) {
+        printf("llread read %02x", buf);
+            int ans = dataStateMachine(buf[0], fd, LlRx);
+            if (ans == 1) {
+                return 1;
+            }
+        }
     }
 
-    for (num_tries = 0; num_tries < 3; num_tries++) {
-        // Reply with DISC, confirming connection ending
-        /*ret = writeData(fd, C_DATA, C_DISC);
-        if(ret != 0) {
-            continue;
-        }
-        */
-
-        // Waits for Emitter connection ending, UA
-        ret = readSupervisionMessage(fd);
-        if(ret != 0)
-        {
-            continue;
-        }
-        return 0;
-        
-    }
+    // if(ret != 0)
+    // {
+    //     fprintf(stderr, "Receiver: Timed out in reading!\n");
+    //     return -1;
+    // } else {
+    //     printf("aaaa %02x \n", ret);
+    // }
 
     return 0;
 }
