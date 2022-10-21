@@ -119,7 +119,7 @@ int llread(unsigned char *packet)
     if(ret != 0)
     {
         fprintf(stderr, "Receiver: Timed out in reading!\n");
-        return ´-1;
+        return -1;
     }
 
     for (num_tries = 0; num_tries < 3; num_tries++) {
