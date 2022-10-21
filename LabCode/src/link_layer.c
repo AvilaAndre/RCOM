@@ -116,6 +116,29 @@ int llread(unsigned char *packet)
 
     //Exits when it receives a DISC
     ret = receiverRead(fd);
+    if(ret != 0)
+    {
+        fprintf(stderr, "Receiver: Timed out in reading!\n");
+        return ´-1;
+    }
+
+    for (num_tries = 0; num_tries < 3; num_tries++) {
+        // Reply with DISC, confirming connection ending
+        /*ret = writeData(fd, C_DATA, C_DISC);
+        if(ret != 0) {
+            continue;
+        }
+        */
+
+        // Waits for Emitter connection ending, UA
+        ret = readSupervisionMessage(fd);
+        if(ret != 0)
+        {
+            continue;
+        }
+        return 0;
+        
+    }
 
     return 0;
 }
