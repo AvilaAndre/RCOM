@@ -63,6 +63,8 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
             return -1;
         }
 
+        sleep(10); //TODO: DELETE
+
         unsigned int counter = 0;
         int count = 0;
         while ((bytesToSend = read(file_fd, buf, PACKET_MAX_SIZE-4)) > 0) {
@@ -76,6 +78,15 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
             }
 
             printf("Sending... %d%% sent. \n",(int) (((double)count / (double)file.st_size) *100));
+        }
+
+        bytesToSend = getControlPacket(filename, file.st_size, FALSE, buf);
+        sleep(10); //TODO: DELETE
+
+        if (llwrite(buf, bytesToSend) < 0) {
+            printf("Failed to send information frame\n");
+            llclose(0);
+            return -1;
         }
 
 
@@ -92,6 +103,11 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
                 llclose(0);
                 return;
             }
+            printf("\n%d packet: ", readResponse); //TODO: delete
+            for (int j = 0; j < readResponse; j++) {
+                printf("|%02x", buf[j]);
+            }
+            printf("\n");
             
             unsigned int packetSize = 0;
 
@@ -103,6 +119,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
                     //return;
                     break;
                 case 1:
+                    printf("Inserting data: %d\n", packetSize);
                     if (fileToWrite == -1) {
                         perror("No file to write initialized.");
                         return;
@@ -114,10 +131,11 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
                     break;
                 case 2:
                     printf("Start ControlPacket: %s %d %d\n", buf, strlen(buf), packetSize);
-                    fileToWrite =  fopen(filename, "w+");
+                    fileToWrite = fopen(filename, "w+");
                     break;
                 case 3:
                     printf("End ControlPacket: %s %d %d\n", buf, strlen(buf), packetSize);
+                    fclose(fileToWrite);
                     break;
             }
         }
@@ -128,3 +146,5 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
         return;
     }
 }
+
+

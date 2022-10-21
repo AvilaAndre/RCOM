@@ -108,7 +108,7 @@ int llwrite(const unsigned char *buf, int bufSize)
 ////////////////////////////////////////////////
 int llread(unsigned char *packet)
 {
-    printf("Entered llread \n");
+    printf("================================= \n");
     int a = 0;
     unsigned char buf[1] = {0};
 
@@ -127,17 +127,29 @@ int llread(unsigned char *packet)
                 return -1;
                 break;
             case 1:
+                unsigned char bcc2 = readPacket[0];
+                for (int i = 1; i < packetSize-2; i++) {
+                    bcc2 = BCC(bcc2, readPacket[i]);
+                }
+                if (bcc2 == readPacket[packetSize-1]) {
+                    printf("bcc2 not correct\n");
+                    resetDataStateMachine();
+                    break;
+                }
                 //verificar
-                for (int i = 0; i < packetSize-1; i++) {
+                for (int i = 0; i < packetSize-2; i++) {
                     packet[i*8] = readPacket[i];
                 }
-                return packetSize-1;
+                return packetSize-2;
                 break;
             case 2:
                 if (stuffing) {
                     stuffing = FALSE;
+                    readPacket[packetSize++] = buf[0] + 0x20;
+                    printf("> %02x", buf[0] + 0x20);
                 } else {
                     readPacket[packetSize++] = buf[0];
+                    printf("> %02x", buf[0]);
                 }
                 break;
             case 3:

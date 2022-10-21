@@ -138,7 +138,7 @@ int senderInformationSend(unsigned char frameToSend[], int frameToSendSize, int 
             nRetransmissions--;
             startAlarm(timeout);
         }
-        sleep(1);
+        return 1;
         //if (senderInformationReceive() == 1) return 1;  // TODO:  
     }
     return 0;

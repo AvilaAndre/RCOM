@@ -98,13 +98,11 @@ int packetSize = 0;
 int stufFlag = FALSE;
 int t2 = FALSE;
 
-/**
- * Return -1 se nao der certo
- * 0 nao for para fazer nada
- * 1 recebi ultima flag
- * 2 byte do packet
- * 3 byte de stuffing
-*/
+
+void resetDataStateMachine() {
+    dataState = TRUE;
+}
+
 
 int dataStateMachine(unsigned char byte, int fd, LinkLayerRole role) {
     while (TRUE) {

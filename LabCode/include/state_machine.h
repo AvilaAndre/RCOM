@@ -6,6 +6,15 @@
 */
 int startVerifyState(unsigned char val, int fd, LinkLayerRole role);
 
+void resetDataStateMachine();
 
-//TODO: Document this.
+/**
+ * State machine that handles information frames.
+ * Return 
+ * -1 if something wrong happened
+ * 0 if no action is needed.
+ * 1 if the last flag was obtained
+ * 2 if a byte to add to the packet was obtained.
+ * 3 if a byte that signals stuffing is received.
+*/
 int dataStateMachine(unsigned char val, int fd, LinkLayerRole role);
