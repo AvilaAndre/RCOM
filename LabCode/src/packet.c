@@ -13,10 +13,16 @@ unsigned int getControlPacket(unsigned char *filename, int fileSize, int start, 
     if (filenameSize - (bytesForFilenameSize * 256) > 0) {
         bytesForFilenameSize++;
     }
+
+    if(bytesForFilenameSize > 255){
+        printf("\nGetControlPacket error: filename size bigger than one byte\n");
+        return 0;
+    }
     
     unsigned char hexaSize[BUF_SIZE] = {0};
     
-    sprintf(hexaSize, "%X", fileSize);
+    
+    sprintf(hexaSize, "%02lX", fileSize);
 
     unsigned int bytesForFileSize = strlen(hexaSize);
 
@@ -24,34 +30,44 @@ unsigned int getControlPacket(unsigned char *filename, int fileSize, int start, 
 
     bytesForFileSize = bytesForFileSize/2;
 
-    unsigned int bytesToSend = 3+ bytesForFilenameSize + filenameSize + bytesForFileSize;
+    if(bytesForFileSize > 255){
+        printf("\nGetControlPacket error: bytes required to represent file size bigger than one\n");
+        return 0;
+    }
 
-    int size = 0;
-    int sizePos = 0;
+    
+    int index = 0;
+
     if (start == TRUE) {
-        packet[size] = C_START;
+        packet[index++] = C_START;
     } else {
-        packet[size] = C_END;
+        packet[index++] = C_END;
     }
-    packet[size + 1] = T_NAME;
-    packet[size + 2] = strlen(filename);
-    size += 2 + bytesForFilenameSize;
-    for (int i = 0; i < strlen(filename); i++) {
-        packet[3 + i] = filename[i];
-    }
-    strncat(packet, filename, filenameSize);
-    size += filenameSize;
-    sizePos = size;
-    packet[size] = 0x02;
-    packet[size + 1] = bytesForFileSize;
-    size += 2; 
-    for (int k = bytesForFileSize-1; k >= 0; k--) {
-        packet[size + bytesForFileSize-k-1] = (unsigned char) (fileSize >> (8*k));
-    }
-    size += bytesForFileSize;
-    packet[sizePos] = T_SIZE;
 
-    return size;
+    packet[index++] = T_NAME;
+    packet[index++] = filenameSize;
+
+    for(int i=0; i<filenameSize; i++){
+        packet[index++] = filename[i];
+    }
+
+    packet[index++] = T_SIZE;
+    packet[index++] = bytesForFileSize;
+
+    for(int i=(bytesForFileSize-1); i>-1; i--){
+		packet[index++] = fileSize >> (8*i);
+	}
+
+    printf("\n\n-----a matilde é muito fixe e resolveu me um bug-------\n");
+    printf("\nGET CONTROL PACKET line 75\n\nsize of control packet: %d\ncontrol packet: 0x", index);
+    for(int i=0; i<index; i++){
+        printf("%02X ", packet[i]);
+    }
+    printf("\n\n");
+    printf("\n-----a matilde é muito fixe e resolveu me um bug-------\n\n");
+    
+
+    return index;
 }
 
 
