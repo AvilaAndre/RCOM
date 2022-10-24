@@ -94,8 +94,19 @@ int llwrite(const unsigned char *buf, int bufSize)
 {
     //Create Information Frame
     unsigned char frame[2*PACKET_MAX_SIZE + 6] = {0};
+
+    printf("\nbuilding:"); //TODO: delete this
+    for (int i = 0; i < bufSize; i++) {
+        printf("%02x|", buf[i]);
+    }
+
     
     int frameSize = buildInformationFrame(&frame, buf, bufSize, ca);
+
+    printf("\nbuilt:"); //TODO: delete this
+    for (int i = 3; i < frameSize; i++) {
+        printf("%02x|", frame[i]);
+    }
 
     if (senderInformationSend(frame, frameSize, connectionInfo.nRetransmissions, connectionInfo.timeout) == 0) return -1;
 
@@ -146,10 +157,8 @@ int llread(unsigned char *packet)
                 if (stuffing) {
                     stuffing = FALSE;
                     readPacket[packetSize++] = buf[0] + 0x20;
-                    printf("> %02x", buf[0] + 0x20);
                 } else {
                     readPacket[packetSize++] = buf[0];
-                    printf("> %02x", buf[0]);
                 }
                 break;
             case 3:

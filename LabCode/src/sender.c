@@ -78,7 +78,6 @@ int buildInformationFrame(unsigned char *frame, unsigned char packet[], int pack
         newPacket[i] = packet[i];
         if(i == 1){
             bcc2 = packet[i-1]^packet[i];
-            i++;
         }
         else if (i > 1){
             bcc2 = bcc2^packet[i];
