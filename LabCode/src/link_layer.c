@@ -95,20 +95,24 @@ int llwrite(const unsigned char *buf, int bufSize)
     //Create Information Frame
     unsigned char frame[2*PACKET_MAX_SIZE + 6] = {0};
 
-    printf("\nbuilding:"); //TODO: delete this
-    for (int i = 0; i < bufSize; i++) {
-        printf("%02x|", buf[i]);
-    }
+    // printf("\nbuilding:"); //TODO: delete this
+    // for (int i = 0; i < bufSize; i++) {
+    //     printf("%02x|", buf[i]);
+    // }
 
     
     int frameSize = buildInformationFrame(&frame, buf, bufSize, ca);
 
-    printf("\nbuilt:"); //TODO: delete this
-    for (int i = 3; i < frameSize; i++) {
-        printf("%02x|", frame[i]);
-    }
+    //printf("\nbuilt:"); //TODO: delete this
+    // for (int i = 3; i < frameSize; i++) {
+    //     printf("%02x|", frame[i]);
+    // }
 
-    if (senderInformationSend(frame, frameSize, connectionInfo.nRetransmissions, connectionInfo.timeout) == 0) return -1;
+    if (senderInformationSend(frame, frameSize, connectionInfo.nRetransmissions, connectionInfo.timeout, ca) == 0) {
+        return -1;
+    } else {
+        if (ca == 0) ca = 1; else ca = 0;
+    }
 
 
     if (frameSize < 0) return -1; // A error occurred during frame building.
@@ -120,7 +124,6 @@ int llwrite(const unsigned char *buf, int bufSize)
 int llread(unsigned char *packet)
 {
     printf("================================= \n");
-    int a = 0;
     unsigned char buf[1] = {0};
 
 
@@ -142,15 +145,17 @@ int llread(unsigned char *packet)
                 for (int i = 1; i < packetSize-1; i++) {
                     bcc2 = BCC(bcc2, readPacket[i]);
                 }
-                if (bcc2 != readPacket[packetSize-1]) { //todo: send REJ
+                if (bcc2 != readPacket[packetSize-1]) {
                     printf("bcc2 not correct\n");
                     resetDataStateMachine();
+                    sendSupervisionFrame(fd, 0, ca);
                     break;
                 }
-                //verificar
                 for (int i = 0; i < packetSize-1; i++) {
                     packet[i*8] = readPacket[i];
                 }
+                sendSupervisionFrame(fd, 1, ca);
+                if (ca == 0) ca = 1; else ca = 0;
                 return packetSize-1;
                 break;
             case 2:
@@ -177,11 +182,29 @@ int llread(unsigned char *packet)
 ////////////////////////////////////////////////
 int llclose(int showStatistics)
 {
+    printf("\nEntered llclose\n");
     if(showStatistics)
     {
         double cpu_time_used = ((double) (clock() - start)) / CLOCKS_PER_SEC * 1000; //in miliseconds
         printf("The application took %f miliseconds to execute \n", cpu_time_used);
     }
+
+    if (connectionInfo.role == LlRx) {
+        if (receiverDisconnect(connectionInfo.nRetransmissions, connectionInfo.timeout, fd)) {
+            printf("Connection terminated.\n");
+        } else {
+            printf("Connection failed to terminate\n");
+        }
+    } else {
+        // send DISC
+        if (senderDisconnect(connectionInfo.nRetransmissions, connectionInfo.timeout, fd)) {
+            printf("Connection terminated \n");
+        } else {
+            printf("Connection failed to terminate. \n");
+        }
+        // receive UA
+    }
+
 
     if (tcsetattr(fd, TCSANOW, &oldtio) == -1)
     {

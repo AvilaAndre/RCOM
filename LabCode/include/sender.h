@@ -28,7 +28,37 @@ int buildInformationFrame(unsigned char *frame, unsigned char packet[], int pack
 
 int sendFrame(unsigned char frameToSend[], int frameToSendSize);
 
-int senderInformationReceive();
+/**
+ * Receive receiver response
+ * Return:
+ * 0 -> Not received
+ * 1 -> Not the right response
+ * 2 -> The right response
+*/
+int senderInformationReceive(int ca);
 
 
-int senderInformationSend(unsigned char frameToSend[], int frameToSendSize, int newNRetransmissions, int timeout);
+int senderInformationSend(unsigned char frameToSend[], int frameToSendSize, int newNRetransmissions, int timeout, int ca);
+
+/**
+ * Receives the disconnect command.
+ * Return:
+ * 0 -> if not received.
+ * 1 -> received
+*/
+int awaitDisc(); 
+
+
+/**
+ * Sends a DISC to the receiver.
+ * Retuns the number of bytes written.
+*/
+int sendDisc();
+
+/**
+ * Sends a DISC to the receiver and awaits for response.
+ * Return:
+ * 1 -> Success
+ * 0 -> Failure
+*/
+int senderDisconnect(int newNRetransmissions, int timeout, int fd);

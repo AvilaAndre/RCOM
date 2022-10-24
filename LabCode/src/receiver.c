@@ -3,11 +3,11 @@
 #include "link_layer.h"
 #include "state_machine.h"
 #include "receiver.h"
+#include "alarm.h"
 
 unsigned char buf[BUF_SIZE] = {0};
 
-int receiverStart(int fd) { //TODO: this might not be correct. What happens after sending the UA?
-
+int receiverStart(int fd) {
     while (TRUE) {
         int bytes_ = read(fd, buf, 1);
         if (buf != 0 && bytes_ > -1) {
@@ -21,24 +21,96 @@ int receiverStart(int fd) { //TODO: this might not be correct. What happens afte
     return 0;
 }
 
-int readSupervisionMessage(int fd) {
- /*   //resetMsgState()
-    byte msg_byte;
-    ssize_t ret;
-    while(getState() != SUP_MSGRECEIVED) {
-        // Ensure the message received is a supervision message
-        if (getState() == INFO_MSG_RECEIVED || getState() == MSG_ERROR) {
-            resetMsgState();
-        }
+int sendSupervisionFrame(int fd, int type, int ca) {
+    unsigned char MSG[5] = {FLAG, A, C_SET, A^C_SET, FLAG};
 
-        ret = read(fd, &msg_byte, 1);
-
-        if (ret <= 0) {
-            return ret;
-        }
-
-        dataStateMachine(byte,fd,LlRx);
+    if (type == 0) {
+        if (ca == 0) 
+            MSG[2] = C_REJ0;
+        else
+            MSG[2] = C_REJ1;
+    } else {
+        if (ca == 0) 
+            MSG[2] = C_RR0;
+        else
+            MSG[2] = C_RR1;
     }
-    */
+    MSG[3] = BCC(MSG[1], MSG[2]);
+
+    int bytes = write(fd, MSG, 5);
+    if (type == 0) {
+        printf("REJ%d flag sent, %d bytes written\n", ca, bytes);
+    } else {
+        printf("RR%d flag sent, %d bytes written\n", ca, bytes);
+    }
+    return bytes;
+}
+
+
+int rcvSendDisc(fd) {
+    unsigned char MSG[5] = {FLAG, A_RCV, C_DISC, A_RCV^C_DISC, FLAG};
+
+    int bytes = write(fd, MSG, 5);
+    printf("\nReceiver DISC flag sent, %d bytes written\n", bytes);
+    return bytes;
+}
+
+int rcvAwaitDisc(int fd) { 
+    unsigned char buf[BUF_SIZE] = {0};
+
+    int bytes_ = read(fd, buf, 1);
+
+    if (buf != 0 && bytes_ > -1) {
+        int ans = closeState(buf[0], fd);
+        if (ans == 1) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+int rcvAwaitUA(int fd) {
+    unsigned char buf[BUF_SIZE] = {0};
+
+    int bytes_ = read(fd, buf, 1);
+
+    if (buf != 0 && bytes_ > -1) {
+        int ans = closeState(buf[0], fd);
+        if (ans == 3) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+
+int rcvNRetransmissions = 0;
+
+int receiverDisconnect(int newNRetransmissions, int timeout, int fd) {
+
+    while(TRUE) {
+        int ans = rcvAwaitDisc(fd);
+        if (ans) {
+            break;
+        }
+    }
+
+    rcvNRetransmissions = newNRetransmissions;
+    while (rcvNRetransmissions > 0) {
+
+        if (!alarmEnabled) {
+            rcvSendDisc(fd);
+            rcvNRetransmissions--;
+            startAlarm(timeout);
+        }
+
+        if (rcvAwaitUA(fd) == 1)  {
+            printf("\nDISC Received, sending UA\n");
+            senderSendDiscUA(fd);
+            return 1;
+        }
+    }
     return 0;
 }

@@ -42,13 +42,11 @@ int senderStart(int newfd, int newNRetransmissions, int timeout) {
     nRetransmissions = newNRetransmissions;
     while (nRetransmissions > 0) {
 
-
         if (!alarmEnabled) {
             sendSET();
             nRetransmissions--;
             startAlarm(timeout);
         }
-
 
         if (senderReceive() == 1) return 1; 
     }
@@ -97,33 +95,32 @@ int buildInformationFrame(unsigned char *frame, unsigned char packet[], int pack
 
 int sendFrame(unsigned char frameToSend[], int frameToSendSize) { 
     int bytes = write(thisfd, frameToSend, frameToSendSize);
-    printf("\n");
-    for (int i = 0; i < frameToSendSize; i++) printf("%02x", frameToSend[i]);
-    printf("\n");
-    printf("Information frame sent, %d bytes written\n", bytes);
+    // printf("\n"); //TODO: delete this
+    // for (int i = 0; i < frameToSendSize; i++) printf("%02x", frameToSend[i]);
+    // printf("\n");
+    // printf("Information frame sent, %d bytes written\n", bytes);
     return bytes;
 }
 
 
-int senderInformationReceive() {
+int senderInformationReceive(int ca) {
 
     unsigned char buf[BUF_SIZE] = {0};
 
     int bytes_ = read(thisfd, buf, 1);
     if (buf != 0 && bytes_ > -1) {
-        /* int ans = dataAnswerState(buf[0], thisfd, LlTx); //TODO: this
+        int ans = dataAnswerState(buf[0], thisfd, ca); //TODO: this
         if (ans == 1) {
             killAlarm();
             return 1;
-        }*/
-        return 1;
+        }
     }
 
     return 0;
 }
 
 
-int senderInformationSend(unsigned char frameToSend[], int frameToSendSize, int newNRetransmissions, int timeout) {
+int senderInformationSend(unsigned char frameToSend[], int frameToSendSize, int newNRetransmissions, int timeout, int ca) {
     nRetransmissions = newNRetransmissions;
     while (nRetransmissions > 0) {
 
@@ -132,8 +129,61 @@ int senderInformationSend(unsigned char frameToSend[], int frameToSendSize, int 
             nRetransmissions--;
             startAlarm(timeout);
         }
-        return 1;
-        //if (senderInformationReceive() == 1) return 1;  // TODO:  
+
+        if (senderInformationReceive(ca) == 1)  {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+
+int senderSendDisc(fd) {
+    unsigned char MSG[5] = {FLAG, A, C_DISC, A^C_DISC, FLAG};
+
+    int bytes = write(fd, MSG, 5);
+    printf("\nEmitter DISC flag sent, %d bytes written\n", bytes);
+    return bytes;
+}
+
+int senderSendDiscUA(int fd) {
+    unsigned char MSG[5] = {FLAG, A_RCV, C_UA, A_RCV^C_UA, FLAG};
+
+    int bytes = write(fd, MSG, 5);
+    printf("\nEmitter UA flag sent, %d bytes written\n", bytes);
+    return bytes;
+}
+
+int awaitDisc(fd) {
+    unsigned char buf[BUF_SIZE] = {0};
+    int bytes_ = read(fd, buf, 1);
+    if (buf != 0 && bytes_ > -1) {
+        int ans = closeState(buf[0], fd); //TODO: this
+        if (ans == 2) {
+            killAlarm();
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+int senderDisconnect(int newNRetransmissions, int timeout, int fd) {
+    nRetransmissions = newNRetransmissions;
+
+    while (nRetransmissions > 0) {
+
+        if (!alarmEnabled) {
+            senderSendDisc(fd);
+            nRetransmissions--;
+            startAlarm(timeout);
+        }
+
+        if (awaitDisc(fd) == 1)  {
+            printf("\nDISC Received, sending UA\n");
+            senderSendDiscUA(fd);
+            return 1;
+        }
     }
     return 0;
 }

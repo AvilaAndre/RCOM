@@ -56,16 +56,7 @@ unsigned int getControlPacket(unsigned char *filename, int fileSize, int start, 
 
     for(int i=(bytesForFileSize-1); i>-1; i--){
 		packet[index++] = fileSize >> (8*i);
-	}
-
-    printf("\n\n-----a matilde é muito fixe e resolveu me um bug-------\n");
-    printf("\nGET CONTROL PACKET line 75\n\nsize of control packet: %d\ncontrol packet: 0x", index);
-    for(int i=0; i<index; i++){
-        printf("%02X ", packet[i]);
-    }
-    printf("\n\n");
-    printf("\n-----a matilde é muito fixe e resolveu me um bug-------\n\n");
-    
+	}    
 
     return index;
 }
@@ -178,7 +169,8 @@ unsigned int handlePacket(unsigned char *packet, unsigned int *size) {
         counter = packet[1*8];
         (*size) = packet[2*8] * 256 + packet[3*8];
         return 1;
-    
+    case C_DISC:
+        return 4;
     default:
         return 0;
     }

@@ -11,6 +11,7 @@ unsigned int getDataPacket(unsigned char *fileData, unsigned int dataSize, unsig
 /**
  * Handles a packet, returning the type of packet and returning the packet through reference as well as the size of the packet.
  * Return:
+ * 4 -> Received disconnect command.
  * 3 -> End of file received, packet is now the filename and size is the size of the file.
  * 2 -> Start of file to receive, packet is now the filename and size is the size of the file.
  * 1 -> Data packet received, packet is now the data transferred and size is the size of the data packet.

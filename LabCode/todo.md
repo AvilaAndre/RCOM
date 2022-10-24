@@ -1,6 +1,11 @@
-[ ] send and receive receiver responses
+[x] send and receive receiver responses
+
 [ ] receive set flag with llread --not necessary
-[ ] disconnect on llclose
-[ ] fix end control packet
+
+[x] disconnect on llclose
+
+[x] fix end control packet
+
 [ ] remove todos
+
 [ ] receiver timeout
