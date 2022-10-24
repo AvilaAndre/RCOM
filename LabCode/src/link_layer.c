@@ -139,19 +139,19 @@ int llread(unsigned char *packet)
                 break;
             case 1:
                 unsigned char bcc2 = readPacket[0];
-                for (int i = 1; i < packetSize-2; i++) {
+                for (int i = 1; i < packetSize-1; i++) {
                     bcc2 = BCC(bcc2, readPacket[i]);
                 }
-                if (bcc2 == readPacket[packetSize-1]) {
+                if (bcc2 != readPacket[packetSize-1]) { //todo: send REJ
                     printf("bcc2 not correct\n");
                     resetDataStateMachine();
                     break;
                 }
                 //verificar
-                for (int i = 0; i < packetSize-2; i++) {
+                for (int i = 0; i < packetSize-1; i++) {
                     packet[i*8] = readPacket[i];
                 }
-                return packetSize-2;
+                return packetSize-1;
                 break;
             case 2:
                 if (stuffing) {

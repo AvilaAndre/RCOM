@@ -177,12 +177,6 @@ unsigned int handlePacket(unsigned char *packet, unsigned int *size) {
     case C_DATA:
         counter = packet[1*8];
         (*size) = packet[2*8] * 256 + packet[3*8];
-        printf("packet read:"); //TODO: delete this debug;
-        for (int j = 0; j < (*size); j++) {
-            packet[j] = packet[j*8 + 4*8];
-            printf("|%02x", packet[j]);
-        }
-        printf("\nsize %d \n", (*size));
         return 1;
     
     default:

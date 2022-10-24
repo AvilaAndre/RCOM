@@ -76,15 +76,10 @@ int buildInformationFrame(unsigned char *frame, unsigned char packet[], int pack
     unsigned char bcc2 = 0x00;
     for(int i = 0; i < packetSize; i++){
         newPacket[i] = packet[i];
-        if(i == 1){
-            bcc2 = packet[i-1]^packet[i];
-        }
-        else if (i > 1){
-            bcc2 = bcc2^packet[i];
-        }
+        bcc2 = BCC(bcc2,packet[i]);
     }
 
-    newPacket[packetSize+1] = bcc2;
+    newPacket[packetSize] = bcc2;
 
     packetSize = stuffing(newPacket, packetSize+1);
 
