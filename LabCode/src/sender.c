@@ -98,18 +98,18 @@ int buildInformationFrame(unsigned char *frame, unsigned char packet[], int pack
 
 
 int sendFrame(unsigned char frameToSend[], int frameToSendSize) { 
-    unsigned char old_byte = frameToSend[2]; //Uncomment to test a faulty packet.
-    int r = rand() % 20;
-    if (r == 13) {
-        printf("SENDING WRONG INFO FRAME\n");
-        frameToSend[2] = 0x43;
-    }
-    if (r == 11) {
-        printf("SENDING DUPLICATE FRAME!\n");
-        write(thisfd, frameToSend, frameToSendSize);
-    }
+    // unsigned char old_byte = frameToSend[2]; //Uncomment to test a faulty packet.
+    // int r = rand() % 20;
+    // if (r == 13) {
+    //     printf("SENDING WRONG INFO FRAME\n");
+    //     frameToSend[2] = 0x43;
+    // }
+    // if (r == 11) {
+    //     printf("SENDING DUPLICATE FRAME!\n");
+    //     write(thisfd, frameToSend, frameToSendSize);
+    // }
     int bytes = write(thisfd, frameToSend, frameToSendSize);
-    frameToSend[2] = old_byte;
+    // frameToSend[2] = old_byte;
     printf("Information frame sent, %d bytes written\n", bytes);
     return bytes;
 }
