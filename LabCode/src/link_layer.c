@@ -140,7 +140,7 @@ int llread(unsigned char *packet)
             case -1:
                 return -1;
                 break;
-            case 1:
+            case 1:;
                 unsigned char bcc2 = readPacket[0];
                 for (int i = 1; i < packetSize-1; i++) {
                     bcc2 = BCC(bcc2, readPacket[i]);
