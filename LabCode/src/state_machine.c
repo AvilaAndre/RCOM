@@ -127,7 +127,7 @@ int dataStateMachine(unsigned char byte, int fd, unsigned int ca) {
                     if (!((byte == C_ZERO && ca == 0) || (byte == C_ONE && ca == 1))) {
                         printf("log > Duplicated frame. \n");
                         resetDataStateMachine();
-                        return 0;
+                        return 5;
                     }
                     return 0;
                 }

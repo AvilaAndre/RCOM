@@ -21,6 +21,7 @@ void resetDataStateMachine();
  * 2 if a byte to add to the packet was obtained.
  * 3 if a byte that signals stuffing is received.
  * 4 received disconnect command.
+ * 5 received duplicated frame.
 */
 int dataStateMachine(unsigned char val, int fd, unsigned int ca);
 

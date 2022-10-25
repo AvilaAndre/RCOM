@@ -171,6 +171,9 @@ int llread(unsigned char *packet)
             case 3:
                 stuffing = TRUE;
                 break;
+            case 5:
+                sendSupervisionFrame(fd, 1, (ca == 0) ? 1 : 0);
+                break;
             default:
                 break;
             }
