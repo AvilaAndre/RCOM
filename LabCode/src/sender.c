@@ -104,7 +104,6 @@ int sendFrame(unsigned char frameToSend[], int frameToSendSize) {
         printf("SENDING WRONG INFO FRAME\n");
         frameToSend[2] = 0x43;
     }
-    printf("%d a\n", r);
     if (r == 11) {
         printf("SENDING DUPLICATE FRAME!\n");
         write(thisfd, frameToSend, frameToSendSize);

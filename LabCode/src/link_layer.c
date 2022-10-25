@@ -192,8 +192,10 @@ int llclose(int showStatistics)
     printf("\nClosing connection.\n");
     if(showStatistics)
     {
+        printf("\n-------------INFORMATION-------------------- \n");
         double cpu_time_used = ((double) (clock() - start)) / CLOCKS_PER_SEC * 1000; //in miliseconds
-        printf("The application took %f miliseconds to execute.\n", cpu_time_used);
+        printf("The application took %f miliseconds to execute.", cpu_time_used);
+        printf("\n-------------------------------------------- \n");
     }
 
     if (connectionInfo.role == LlRx) {

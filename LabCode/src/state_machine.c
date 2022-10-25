@@ -206,19 +206,22 @@ int dataAnswerState(unsigned char val, int fd, int ca) {
             resState = 0;
             resptr = 0;
             if (resSavedChars[2] == C_RR0) {
-                if (ca == 0) return 1; else return -1;
+                printf("RR0 received. \n");
                 resState = 0;
                 resptr = 0;
-                return -1;
+                if (ca == 0) return 1; else return -1;
             } else if (resSavedChars[2] == C_RR1) {
+                printf("RR1 received. \n");
                 resState = 0;
                 resptr = 0;
                 if (ca == 1) return 1; else return -1;
             } else if (resSavedChars[2] == C_REJ0) {
+                printf("REJ0 received. \n");
                 resState = 0;
                 resptr = 0;
                 return -1;
             } else if (resSavedChars[2] == C_REJ1) {
+                printf("REJ1 received. \n");
                 resState = 0;
                 resptr = 0;
                 return -1;
