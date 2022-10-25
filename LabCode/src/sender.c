@@ -40,9 +40,10 @@ int senderReceive() {
 int senderStart(int newfd, int newNRetransmissions, int timeout) {
     thisfd = newfd;
     nRetransmissions = newNRetransmissions;
-    while (nRetransmissions > 0) {
+    while (TRUE) {
 
         if (!alarmEnabled) {
+            if (nRetransmissions == 0) return 0;
             sendSET();
             nRetransmissions--;
             startAlarm(timeout);
@@ -94,11 +95,20 @@ int buildInformationFrame(unsigned char *frame, unsigned char packet[], int pack
 
 
 int sendFrame(unsigned char frameToSend[], int frameToSendSize) { 
+    // unsigned char old_byte = frameToSend[2]; Uncomment to test a faulty packet.
+    int r = rand() % 20;
+    // if (r == 13) {
+    //     printf("SENDING WRONG INFO FRAME\n");
+    //     frameToSend[2] = 0x43;
+    // }
+    printf("%d\n", r);
+    if (r == 11) {
+        printf("SENDING DUPLICATE FRAME!\n");
+        write(thisfd, frameToSend, frameToSendSize);
+    }
     int bytes = write(thisfd, frameToSend, frameToSendSize);
-    // printf("\n"); //TODO: delete this
-    // for (int i = 0; i < frameToSendSize; i++) printf("%02x", frameToSend[i]);
-    // printf("\n");
-    // printf("Information frame sent, %d bytes written\n", bytes);
+    //frameToSend[2] = old_byte;
+    printf("Information frame sent, %d bytes written\n", bytes);
     return bytes;
 }
 
@@ -122,9 +132,10 @@ int senderInformationReceive(int ca) {
 
 int senderInformationSend(unsigned char frameToSend[], int frameToSendSize, int newNRetransmissions, int timeout, int ca) {
     nRetransmissions = newNRetransmissions;
-    while (nRetransmissions > 0) {
+    while (TRUE) {
 
         if (!alarmEnabled) {
+            if (nRetransmissions == 0) return 0;
             sendFrame(frameToSend, frameToSendSize);
             nRetransmissions--;
             startAlarm(timeout);
@@ -169,11 +180,11 @@ int awaitDisc(fd) {
 }
 
 int senderDisconnect(int newNRetransmissions, int timeout, int fd) {
-    nRetransmissions = newNRetransmissions;
 
-    while (nRetransmissions > 0) {
+    while (TRUE) {
 
         if (!alarmEnabled) {
+            if (nRetransmissions == 0) return 0;
             senderSendDisc(fd);
             nRetransmissions--;
             startAlarm(timeout);

@@ -41,7 +41,7 @@ int startVerifyState(unsigned char val, int fd, LinkLayerRole role) {
                 state = 4;
             } else {
                 state = 0;
-                printf("log > Bad input, restarting... \n");
+                printf("log > Erro de protocolo \n");
                 ptr = 0;
                 return 0;
             } 
@@ -97,7 +97,8 @@ int t2 = FALSE;
 
 
 void resetDataStateMachine() {
-    dataState = TRUE;
+    dataState = START;
+    dataptr = 0;
 }
 
 
@@ -131,10 +132,15 @@ int dataStateMachine(unsigned char byte, int fd, LinkLayerRole role) {
                     dataState = RECEIVING_PACKET;
                     savedChars[dataptr++] = byte;
                     return 0;
-                } else {
+                } else if (byte == FLAG){
                     dataState = FLAG_RECEIVED;
                     dataptr = 0;
-                    return -1;
+                    return 0;
+                } else {
+                    printf("log > Erro de protocolo \n");
+                    dataptr = 0;
+                    resetDataStateMachine();
+                    return 0;
                 }
                 break;
             case RECEIVING_PACKET:
@@ -149,6 +155,7 @@ int dataStateMachine(unsigned char byte, int fd, LinkLayerRole role) {
                 }
                 break;
         }
+        return 0;
     }
 } 
 
@@ -186,7 +193,7 @@ int dataAnswerState(unsigned char val, int fd, int ca) {
                 state = 4;
             } else {
                 resState = 0;
-                printf("log > Bad input, restarting... \n");
+                printf("log > Erro de protocolo \n");
                 resptr = 0;
                 return 0;
             } 
@@ -259,6 +266,7 @@ int closeState(unsigned char byte, int fd) {
                     endSavedChars[endptr++] = byte;
                     return 0;
                 } else {
+                    printf("log > Erro de protocolo \n");
                     endState = FLAG_RECEIVED;
                     endptr = 0;
                     return -1;

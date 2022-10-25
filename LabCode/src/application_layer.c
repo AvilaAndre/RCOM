@@ -68,14 +68,13 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
             counter++;
             count += bytesToSend;
             bytesToSend = getDataPacket(&buf, bytesToSend, counter);
-
-            printf("\n");
+            printf("================================= \n");
             if (llwrite(buf, bytesToSend) < 0) {
                 printf("Failed to send information frame\n");
                 llclose(0);
                 return -1;
             }
-            printf("Sending... %d/%d (%d%%) sent. \n",  count, file.st_size, (int) (((double)count / (double)file.st_size) *100));
+            printf("Sending... %d/%d (%d%%) sent. \n", count, file.st_size, (int) (((double)count / (double)file.st_size) *100));
         }
 
         bytesToSend = getControlPacket(filename, file.st_size, FALSE, buf);
@@ -105,10 +104,9 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
 
             switch (handlePacket(&buf, &packetSize)) {
                 case 0:
-                    //perror("Error handling packet.");
-                    printf("Error handling packet.");
-                    //llclose(0);
-                    //return;
+                    perror("Error handling packet.");
+                    llclose(0);
+                    return;
                     break;
                 case 1:
                     printf("Inserting data: %d\n", packetSize);
@@ -118,7 +116,6 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
                     }
                     // Writing to file
                     for (int j = 4; j < packetSize + 4; j++) { 
-                        //printf("%02x|", buf[j]); //TODO: delete this
                         fputc(buf[j], fileToWrite);
                     }
                     printf("\n");
@@ -136,7 +133,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
         }
     }
 
-    if (llclose(0) < 0) { //TODO: Discover what showStatistics means.
+    if (llclose(1) < 0) { //TODO: Discover what showStatistics means.
         printf("\n ERROR: An error occurred while closing the connection. \n");
         return;
     }

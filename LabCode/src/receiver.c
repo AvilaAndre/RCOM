@@ -98,9 +98,10 @@ int receiverDisconnect(int newNRetransmissions, int timeout, int fd) {
     }
 
     rcvNRetransmissions = newNRetransmissions;
-    while (rcvNRetransmissions > 0) {
+    while (TRUE) {
 
         if (!alarmEnabled) {
+            if (rcvNRetransmissions == 0) return 0;
             rcvSendDisc(fd);
             rcvNRetransmissions--;
             startAlarm(timeout);

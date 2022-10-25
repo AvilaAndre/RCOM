@@ -138,6 +138,7 @@ int llread(unsigned char *packet)
             switch (ans)
             {
             case -1:
+                resetDataStateMachine();
                 return -1;
                 break;
             case 1:;
@@ -146,7 +147,7 @@ int llread(unsigned char *packet)
                     bcc2 = BCC(bcc2, readPacket[i]);
                 }
                 if (bcc2 != readPacket[packetSize-1]) {
-                    printf("bcc2 not correct\n");
+                    printf("log > Data error. \n");
                     resetDataStateMachine();
                     sendSupervisionFrame(fd, 0, ca);
                     break;
@@ -156,6 +157,7 @@ int llread(unsigned char *packet)
                 }
                 sendSupervisionFrame(fd, 1, ca);
                 if (ca == 0) ca = 1; else ca = 0;
+                printf("Information frame received. \n");
                 return packetSize-1;
                 break;
             case 2:
@@ -182,27 +184,27 @@ int llread(unsigned char *packet)
 ////////////////////////////////////////////////
 int llclose(int showStatistics)
 {
-    printf("\nEntered llclose\n");
+    printf("\n================================= \n");
+
+    printf("\nClosing connection.\n");
     if(showStatistics)
     {
         double cpu_time_used = ((double) (clock() - start)) / CLOCKS_PER_SEC * 1000; //in miliseconds
-        printf("The application took %f miliseconds to execute \n", cpu_time_used);
+        printf("The application took %f miliseconds to execute.\n", cpu_time_used);
     }
 
     if (connectionInfo.role == LlRx) {
         if (receiverDisconnect(connectionInfo.nRetransmissions, connectionInfo.timeout, fd)) {
-            printf("Connection terminated.\n");
+            printf("\nConnection terminated.\n");
         } else {
-            printf("Connection failed to terminate\n");
+            printf("\nConnection failed to terminate.\n");
         }
     } else {
-        // send DISC
         if (senderDisconnect(connectionInfo.nRetransmissions, connectionInfo.timeout, fd)) {
-            printf("Connection terminated \n");
+            printf("\nConnection terminated.\n");
         } else {
-            printf("Connection failed to terminate. \n");
+            printf("\nConnection failed to terminate.\n");
         }
-        // receive UA
     }
 
 

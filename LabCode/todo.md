@@ -7,5 +7,3 @@
 [x] fix end control packet
 
 [ ] remove todos
-
-[ ] receiver timeout
