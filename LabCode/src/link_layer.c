@@ -94,26 +94,14 @@ int llwrite(const unsigned char *buf, int bufSize)
 {
     //Create Information Frame
     unsigned char frame[2*PACKET_MAX_SIZE + 6] = {0};
-
-    // printf("\nbuilding:"); //TODO: delete this
-    // for (int i = 0; i < bufSize; i++) {
-    //     printf("%02x|", buf[i]);
-    // }
-
     
     int frameSize = buildInformationFrame(&frame, buf, bufSize, ca);
-
-    //printf("\nbuilt:"); //TODO: delete this
-    // for (int i = 3; i < frameSize; i++) {
-    //     printf("%02x|", frame[i]);
-    // }
 
     if (senderInformationSend(frame, frameSize, connectionInfo.nRetransmissions, connectionInfo.timeout, ca) == 0) {
         return -1;
     } else {
         if (ca == 0) ca = 1; else ca = 0;
     }
-
 
     if (frameSize < 0) return -1; // A error occurred during frame building.
 }

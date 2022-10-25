@@ -133,7 +133,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
         }
     }
 
-    if (llclose(1) < 0) { //TODO: Discover what showStatistics means.
+    if (llclose(1) < 0) {
         printf("\n ERROR: An error occurred while closing the connection. \n");
         return;
     }
