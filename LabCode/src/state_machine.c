@@ -41,7 +41,7 @@ int startVerifyState(unsigned char val, int fd, LinkLayerRole role) {
                 state = 4;
             } else {
                 state = 0;
-                printf("log > Erro de protocolo \n");
+                printf("log > Protocol error. \n");
                 ptr = 0;
                 return 0;
             } 
@@ -102,7 +102,7 @@ void resetDataStateMachine() {
 }
 
 
-int dataStateMachine(unsigned char byte, int fd, LinkLayerRole role) {
+int dataStateMachine(unsigned char byte, int fd, unsigned int ca) {
     while (TRUE) {
         switch (dataState)
         {
@@ -124,6 +124,11 @@ int dataStateMachine(unsigned char byte, int fd, LinkLayerRole role) {
                 if (byte != FLAG) {
                     dataState = CONTROL_RECEIVED;
                     savedChars[dataptr++] = byte;
+                    if (!((byte == C_ZERO && ca == 0) || (byte == C_ONE && ca == 1))) {
+                        printf("log > Duplicated frame. \n");
+                        resetDataStateMachine();
+                        return 0;
+                    }
                     return 0;
                 }
                 break;
@@ -137,7 +142,7 @@ int dataStateMachine(unsigned char byte, int fd, LinkLayerRole role) {
                     dataptr = 0;
                     return 0;
                 } else {
-                    printf("log > Erro de protocolo \n");
+                    printf("log > Protocol error. \n");
                     dataptr = 0;
                     resetDataStateMachine();
                     return 0;
@@ -193,7 +198,7 @@ int dataAnswerState(unsigned char val, int fd, int ca) {
                 state = 4;
             } else {
                 resState = 0;
-                printf("log > Erro de protocolo \n");
+                printf("log > Protocol error. \n");
                 resptr = 0;
                 return 0;
             } 
@@ -266,7 +271,7 @@ int closeState(unsigned char byte, int fd) {
                     endSavedChars[endptr++] = byte;
                     return 0;
                 } else {
-                    printf("log > Erro de protocolo \n");
+                    printf("log > Procotol error. \n");
                     endState = FLAG_RECEIVED;
                     endptr = 0;
                     return -1;

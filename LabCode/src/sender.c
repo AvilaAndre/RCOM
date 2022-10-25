@@ -43,7 +43,10 @@ int senderStart(int newfd, int newNRetransmissions, int timeout) {
     while (TRUE) {
 
         if (!alarmEnabled) {
-            if (nRetransmissions == 0) return 0;
+            if (nRetransmissions == 0) {
+                printf("log > Timed out \n");
+                return 0;
+            }
             sendSET();
             nRetransmissions--;
             startAlarm(timeout);
@@ -54,7 +57,7 @@ int senderStart(int newfd, int newNRetransmissions, int timeout) {
     return 0;
 }
 
-int buildInformationFrame(unsigned char *frame, unsigned char packet[], int packetSize,  unsigned int ca) {
+int buildInformationFrame(unsigned char *frame, unsigned char packet[], int packetSize, unsigned int ca) {
 
     int frameSize = 4;
 
@@ -63,9 +66,9 @@ int buildInformationFrame(unsigned char *frame, unsigned char packet[], int pack
     frame[1] = A;
     //Set Alternating Control Address
     if(ca == 0){
-        frame[2] == C_ZERO;
+        frame[2] = C_ZERO;
     } else {
-        frame[2] == C_ONE;
+        frame[2] = C_ONE;
     }
     //Set BCC1
     frame[3] = frame[1]^frame[2];
@@ -96,16 +99,15 @@ int buildInformationFrame(unsigned char *frame, unsigned char packet[], int pack
 
 int sendFrame(unsigned char frameToSend[], int frameToSendSize) { 
     // unsigned char old_byte = frameToSend[2]; Uncomment to test a faulty packet.
-    int r = rand() % 20;
+    //int r = rand() % 20;
     // if (r == 13) {
     //     printf("SENDING WRONG INFO FRAME\n");
     //     frameToSend[2] = 0x43;
     // }
-    printf("%d\n", r);
-    if (r == 11) {
-        printf("SENDING DUPLICATE FRAME!\n");
-        write(thisfd, frameToSend, frameToSendSize);
-    }
+    // if (r == 11) {
+    //     printf("SENDING DUPLICATE FRAME!\n");
+    //     write(thisfd, frameToSend, frameToSendSize);
+    // }
     int bytes = write(thisfd, frameToSend, frameToSendSize);
     //frameToSend[2] = old_byte;
     printf("Information frame sent, %d bytes written\n", bytes);
@@ -135,7 +137,10 @@ int senderInformationSend(unsigned char frameToSend[], int frameToSendSize, int 
     while (TRUE) {
 
         if (!alarmEnabled) {
-            if (nRetransmissions == 0) return 0;
+            if (nRetransmissions == 0) {
+                printf("log > Timed out \n");
+                return 0;
+            }
             sendFrame(frameToSend, frameToSendSize);
             nRetransmissions--;
             startAlarm(timeout);
@@ -184,7 +189,10 @@ int senderDisconnect(int newNRetransmissions, int timeout, int fd) {
     while (TRUE) {
 
         if (!alarmEnabled) {
-            if (nRetransmissions == 0) return 0;
+            if (nRetransmissions == 0) {
+                printf("log > Timed out \n");
+                return 0;
+            }
             senderSendDisc(fd);
             nRetransmissions--;
             startAlarm(timeout);

@@ -101,7 +101,10 @@ int receiverDisconnect(int newNRetransmissions, int timeout, int fd) {
     while (TRUE) {
 
         if (!alarmEnabled) {
-            if (rcvNRetransmissions == 0) return 0;
+            if (rcvNRetransmissions == 0) {
+                printf("log > Timed out \n");
+                return 0;
+            }
             rcvSendDisc(fd);
             rcvNRetransmissions--;
             startAlarm(timeout);

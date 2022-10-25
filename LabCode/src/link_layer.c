@@ -134,7 +134,7 @@ int llread(unsigned char *packet)
     while (TRUE) {
         int bytes_ = read(fd, &buf, 1);
         if (buf != 0 && bytes_ > -1) {
-            int ans = dataStateMachine(buf[0], fd, LlRx);
+            int ans = dataStateMachine(buf[0], fd, ca);
             switch (ans)
             {
             case -1:

@@ -22,7 +22,7 @@ void resetDataStateMachine();
  * 3 if a byte that signals stuffing is received.
  * 4 received disconnect command.
 */
-int dataStateMachine(unsigned char val, int fd, LinkLayerRole role);
+int dataStateMachine(unsigned char val, int fd, unsigned int ca);
 
 
 /**
