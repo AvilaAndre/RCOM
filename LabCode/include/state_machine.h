@@ -6,6 +6,10 @@
 */
 int startVerifyState(unsigned char val, int fd, LinkLayerRole role);
 
+
+/**
+ * Resets the data state machine to its default values.
+*/
 void resetDataStateMachine();
 
 /**

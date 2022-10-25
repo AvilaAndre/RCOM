@@ -40,8 +40,6 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
     
 
     if (link.role == LlTx) {
-        //TODO: send file
-
         struct stat file;
         stat(filename, &file);
 
@@ -67,8 +65,9 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
         unsigned int counter = 0;
         int count = 0;
         while ((bytesToSend = read(file_fd, buf, PACKET_MAX_SIZE-4)) > 0) {
+            counter++;
             count += bytesToSend;
-            bytesToSend = getDataPacket(&buf, bytesToSend, counter); // TODO: counter logic
+            bytesToSend = getDataPacket(&buf, bytesToSend, counter);
 
             printf("\n");
             if (llwrite(buf, bytesToSend) < 0) {
@@ -76,7 +75,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
                 llclose(0);
                 return -1;
             }
-            printf("Sending... %d%% sent. \n",(int) (((double)count / (double)file.st_size) *100));
+            printf("Sending... %d/%d (%d%%) sent. \n",  count, file.st_size, (int) (((double)count / (double)file.st_size) *100));
         }
 
         bytesToSend = getControlPacket(filename, file.st_size, FALSE, buf);

@@ -11,7 +11,6 @@ int state = 0;
 unsigned char savedChars[BUF_SIZE] = {};
 int ptr = 0;
 
-//TODO: return -1 on error
 int startVerifyState(unsigned char val, int fd, LinkLayerRole role) {  
     while (TRUE) {
         switch (state)
@@ -76,10 +75,6 @@ int startVerifyState(unsigned char val, int fd, LinkLayerRole role) {
         return 0;
     }
 }
-
-
-//TODO: merge with function on top ↑ ↑
-
 
 enum mst {
     START,

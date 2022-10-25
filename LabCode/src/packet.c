@@ -69,7 +69,7 @@ unsigned int getDataPacket(unsigned char *fileData, unsigned int dataSize, unsig
     int l2 = dataSize%256;
 
     packet[0] = C_DATA;
-    packet[1] = counter % 256;
+    packet[1] = counter % 255;
     packet[2] = l1;
     packet[3] = l2;
     for (int k = 0; k < dataSize; k++) {
@@ -128,7 +128,7 @@ unsigned int handlePacket(unsigned char *packet, unsigned int *size) {
         }
         return 2;
     case C_END:
-        if (packet[1*8] == T_SIZE) { // Avila: By my code this situation will never happen tbh.
+        if (packet[1*8] == T_SIZE) {
             sizeSize = packet[2*8];
             unsigned int newSize = 0;
             int i = 0;

@@ -109,7 +109,7 @@ int senderInformationReceive(int ca) {
 
     int bytes_ = read(thisfd, buf, 1);
     if (buf != 0 && bytes_ > -1) {
-        int ans = dataAnswerState(buf[0], thisfd, ca); //TODO: this
+        int ans = dataAnswerState(buf[0], thisfd, ca);
         if (ans == 1) {
             killAlarm();
             return 1;
@@ -158,7 +158,7 @@ int awaitDisc(fd) {
     unsigned char buf[BUF_SIZE] = {0};
     int bytes_ = read(fd, buf, 1);
     if (buf != 0 && bytes_ > -1) {
-        int ans = closeState(buf[0], fd); //TODO: this
+        int ans = closeState(buf[0], fd);
         if (ans == 2) {
             killAlarm();
             return 1;
