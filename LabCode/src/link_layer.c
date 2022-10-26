@@ -127,6 +127,7 @@ int llread(unsigned char *packet)
             {
             case -1:
                 resetDataStateMachine();
+                packetSize = 0;
                 return -1;
                 break;
             case 1:;
@@ -137,6 +138,7 @@ int llread(unsigned char *packet)
                 if (bcc2 != readPacket[packetSize-1]) {
                     printf("log > Data error. \n");
                     resetDataStateMachine();
+                    packetSize = 0;
                     sendSupervisionFrame(fd, 0, ca);
                     break;
                 }

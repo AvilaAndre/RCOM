@@ -125,7 +125,7 @@ int senderInformationReceive(int ca) {
         if (ans == 1) {
             killAlarm();
             return 1;
-        }
+        } else if (ans == -1) return -1;
     }
 
     return 0;
@@ -146,8 +146,13 @@ int senderInformationSend(unsigned char frameToSend[], int frameToSendSize, int 
             startAlarm(timeout);
         }
 
-        if (senderInformationReceive(ca) == 1)  {
+        int ans = senderInformationReceive(ca);
+
+        if (ans == 1)  {
             return 1;
+        } else if (ans == -1) {
+            alarmEnabled = FALSE;
+            nRetransmissions++;
         }
     }
     return 0;
