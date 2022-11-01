@@ -50,7 +50,7 @@ int startVerifyState(unsigned char val, int fd, LinkLayerRole role) {
             ptr = 0;
             if (role == LlRx) {
                 if (savedChars[2] == C_SET) {
-                    savedChars[2] = 0x07;
+                    savedChars[2] = C_UA;
                     savedChars[3] = BCC(savedChars[1],savedChars[2]);
                     savedChars[4] = 0x7E;
                     printf("log > Sending UA \n");
