@@ -1,0 +1,1 @@
+int getIP(char hostname[]);
