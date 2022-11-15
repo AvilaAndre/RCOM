@@ -8,24 +8,25 @@ CFLAGS = -Wall
 SRC = src/
 INCLUDE = include/
 BIN = bin/
-CABLE_DIR = cable/
 
-TX_SERIAL_PORT = /dev/ttyS10
-RX_SERIAL_PORT = /dev/ttyS11
-
-TX_FILE = penguin.gif
-RX_FILE = penguin-received.gif
+FTP_FEUP = ftp://ftp.fe.up.pt
 
 # Targets
 .PHONY: all
-all: $(BIN)/main $(BIN)/cable
+all: $(BIN)/main
 
 $(BIN)/main: main.c $(SRC)/*.c
 	$(CC) $(CFLAGS) -o $@ $^ -I$(INCLUDE)
-
-$(BIN)/cable: $(CABLE_DIR)/cable.c
-	$(CC) $(CFLAGS) -o $@ $^
  
 .PHONY: clean
 clean:
 	rm -f $(BIN)/main
+
+.PHONY: run_feup
+run_feup:
+	make clean && make && $(BIN)/main $(FTP_FEUP)
+
+# make run arg=ftp://ftp.fe.up.pt
+.PHONY: run
+run:
+	make clean && make && $(BIN)/main $(arg)
