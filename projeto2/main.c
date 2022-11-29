@@ -1,5 +1,14 @@
-#include "include/socket.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include "include/URL.h"
 #include "include/utils.h"
+#include "include/socket.h"
 
 
 int getHostnameString(char hostString[], char hostname[]) {
@@ -20,10 +29,38 @@ int getHostnameString(char hostString[], char hostname[]) {
 
 
 int main(int argc, char **argv) {
-    printf(">>%s", argv[1]);
-    char hostname[20] = {0};
-    printf("\ngetHostname: %d\n", getHostnameString(argv[1], hostname));
-    printf("hostname: %s\n", hostname);
+    if (argc != 2) {
+		fprintf(stderr, "Wrong number of arguments!");
+		return 1;
+	}
+
+	struct URL url;
+	resetURL(&url);
+
+    parseURL(&url,argv[1]);
+
+    printf("Username: %s\n", url.user);
+	printf("Password: %s\n", url.password);
+	printf("Host: %s\n", url.host);
+	printf("Path :%s\n", url.path);
+	printf("Filename: %s\n", url.filename);
+
+    struct hostent *h;
     
-    getIP(hostname);
+    h = getIP(url.host);
+
+    char* ip = inet_ntoa(*((struct in_addr *) h->h_addr_list[0]));
+
+    printf("ip: %s\n", ip);
+    printf("port: %d\n", url.port);
+
+    int socketfd;
+    if((socketfd = connectToSocket(ip,url.port)) == -1)
+    {
+		fprintf(stderr, "Unable to connect to socket");
+		exit(1);
+	}
+
+    return 0;
+		
 }

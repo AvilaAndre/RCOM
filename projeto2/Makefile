@@ -9,7 +9,8 @@ SRC = src/
 INCLUDE = include/
 BIN = bin/
 
-FTP_FEUP = ftp://ftp.fe.up.pt
+# ftp://[<user>:<password>@]<host>/<url-path>
+FTP_FEUP = ftp://anonymous:qualquer-password@ftp.up.pt/
 
 # Targets
 .PHONY: all

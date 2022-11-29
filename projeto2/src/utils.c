@@ -3,8 +3,9 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include "../include/utils.h"
 
-int getIP(char hostname[]) {
+struct hostent* getIP(char *hostname) {
     struct hostent *h;
 
 /**
@@ -25,9 +26,5 @@ int getIP(char hostname[]) {
         herror("gethostbyname()");
         exit(-1);
     }
-
-    printf("Host name  : %s\n", h->h_name);
-    printf("IP Address : %s\n", inet_ntoa(*((struct in_addr *) h->h_addr)));
-
-    return 0;
+    return h;
 }
