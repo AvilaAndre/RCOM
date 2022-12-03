@@ -5,11 +5,17 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "utils.h"
+#include "socket.h"
 
 #include <string.h>
 
+// When in passive mode
+int dataAddress[6] = {0,0,0,0,0,0};
+int dataAddressPointer = 0;
+int reading = FALSE;
+int numberRead = 0;
 
-int readSocket(int sockfd, int printMSG) {
+int readSocket(int sockfd, int *extraReturn) {
     char newBuf[1];
     char lastChar = 0x00;
 
@@ -33,16 +39,48 @@ int readSocket(int sockfd, int printMSG) {
             } else {
                 codeFound = TRUE;
             }
+        } else {
+            switch (code)
+            {
+            case FTP_PASV:
+                if(reading) {
+                    if (newBuf[0] == 0x29) {
+                        reading = FALSE;
+                        dataAddress[dataAddressPointer++] = numberRead;
+
+                        char address[256] = {0};
+                        int port = dataAddress[4] * 256 + dataAddress[5];
+
+                        sprintf(address, "%d.%d.%d.%d", dataAddress[0], dataAddress[1], dataAddress[2], dataAddress[3]);
+                        // printf("\n%s.%d \n", address, port); //DEBUG:
+
+
+                        //connect to new socket and return it's fd
+                        printf("\nConnecting to data socket\n\n");
+                        (*extraReturn) = connectToSocket(address, port);
+                    } else if (newBuf[0] == 0x2c) {
+                        dataAddress[dataAddressPointer++] = numberRead;
+                        numberRead = 0;
+                    } else if (newBuf[0] >= 0x30 && newBuf[0] <= 0x39) {
+                        numberRead = numberRead * 10;
+                        numberRead += newBuf[0] - 0x30;
+                    }
+                } else {
+                    if (newBuf[0] == 0x28) reading = TRUE;
+                }
+                break;
+            default:
+                break;
+            }
+
         }
+
 
         // printf("end\n");
         if (readBytes <= 0) break;
 
         newBuf[readBytes] = '\0';
 
-        if (printMSG) printf("%c", newBuf[0]);
-
-        //printf("response b %02x last %02x\n", newBuf[0], lastChar);
         if (newBuf[0] == 0x0A && lastChar == 0x0D && codeFound) {
             //printf("code: %d\n", code);
             codeFound = FALSE;

@@ -1,6 +1,8 @@
 #pragma once
 
-int readSocket(int sockfd, int printMSG);
+#define FTP_PASV 227
+
+int readSocket(int sockfd, int *extraReturn);
 
 int writeToSocket(int sockfd, char msg[], int size);
 

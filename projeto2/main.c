@@ -61,16 +61,20 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 
-    readSocket(socketfd, FALSE);
+    readSocket(socketfd, NULL);
     
     int response = 0;
 
     // Sending username
-    char username[] = "user anonymous";
+    char *username = malloc(10 + strlen(url.user));
+    username[0] = '\0';
+
+    strcat(username, "user ");
+    strcat(username, url.user);
 
     writeToSocket(socketfd, username, strlen(username));
 
-    response = readSocket(socketfd, FALSE);
+    response = readSocket(socketfd, NULL);
 
     if (response != 331) {
         printf("Login failed. Wrong username\n");
@@ -79,11 +83,15 @@ int main(int argc, char **argv) {
 
     // Sending password
 
-    char password[] = "pass anonymous";
+    char *password = malloc(10 + strlen(url.password));
+    password[0] = '\0';
+
+    strcat(password, "pass ");
+    strcat(password, url.password);
     
     writeToSocket(socketfd, password, strlen(password));
 
-    response = readSocket(socketfd, FALSE);
+    response = readSocket(socketfd, NULL);
 
     if (response != 230) {
         printf("Login failed. Wrong password\n");
@@ -92,8 +100,17 @@ int main(int argc, char **argv) {
         printf("\nLogin successful.\n\n");
     }
 
-    if (disconnectFromSocket(socketfd) == -1) exit(-1);
+    // Entering passive mode
 
+    writeToSocket(socketfd, "pasv", 4);
+
+    int datasocket = 0;
+
+    readSocket(socketfd, &datasocket);
+
+    printf("datasocket = %d \n", datasocket);
+
+    if (disconnectFromSocket(socketfd) == -1) exit(-1);
 
     return 0;
 }
