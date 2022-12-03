@@ -15,6 +15,7 @@ FTP_FEUP2 = ftp://anonymous:qualquer-password@ftp.up.pt/pub/kodi/robots.txt
 FTP_KODI1 = ftp://anonymous:qualquer-password@ftp.up.pt/pub/kodi/screenshots/kodi-addons.jpg
 FTP_KODI2 = ftp://anonymous:qualquer-password@ftp.up.pt/pub/kodi/screenshots/kodi-videolibrary.jpg
 FTP_KODIAPK = ftp://anonymous:qualquer-password@ftp.up.pt/pub/kodi/snapshots/android/arm/kodi-18.0-Leia_alpha2-armeabi-v7a.apk 
+FTP_VIM_ROBOTS = ftp://anonymous:qualquer-password@ftp.vim.org/pub/ftp/robots.txt
 
 # Targets
 .PHONY: all
@@ -46,6 +47,10 @@ run_kodi2:
 .PHONY: run_kodiapk
 run_kodiapk:
 	make clean && make && $(BIN)/main $(FTP_KODIAPK)
+
+.PHONY: run_vim_robots
+run_vim_robots:
+	make clean && make && $(BIN)/main $(FTP_VIM_ROBOTS)
 
 
 # make run arg=ftp://ftp.fe.up.pt

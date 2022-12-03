@@ -131,6 +131,8 @@ int main(int argc, char **argv) {
 
     fclose(fileToWrite);
 
+    printf("File received.\n\n");
+
 
     if (disconnectFromSocket(socketfd) == -1) exit(-1);
 
