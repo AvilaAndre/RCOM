@@ -61,6 +61,21 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 
+    readSocket(socketfd);
+    /*send a string to the server*/
+    char buf[] = "user anonymous\r\n";
+
+    int bytes = write(socketfd, buf, strlen(buf));
+    if (bytes > 0)
+        printf("Bytes escritos %ld\n", bytes);
+    else {
+        perror("write()");
+        exit(-1);
+    }
+
+    readSocket(socketfd);
+
+    disconnectFromSocket(socketfd);
     return 0;
 		
 }

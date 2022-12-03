@@ -10,7 +10,7 @@ INCLUDE = include/
 BIN = bin/
 
 # ftp://[<user>:<password>@]<host>/<url-path>
-FTP_FEUP = ftp://anonymous:qualquer-password@ftp.up.pt/
+FTP_FEUP = ftp://anonymous:qualquer-password@ftp.up.pt/pub/robots.txt
 
 # Targets
 .PHONY: all

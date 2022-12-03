@@ -4,9 +4,59 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <strings.h>
+#include "utils.h"
 
 #include <string.h>
+
+
+int readSocket(int sockfd) {
+    char newBuf[1];
+    char lastChar = 0x00;
+
+
+    int codeFound = FALSE;
+    int newLine = FALSE;
+    int code = 0;
+
+    while(1) {
+        // printf("start\n");
+
+        int readBytes = read(sockfd, newBuf, 1);
+
+        if (!codeFound) {
+            if (newBuf[0] >= 0x30 && newBuf[0] <= 0x39) {
+                code = code *10;
+                code += newBuf[0] - 0x30;
+            } else if (newBuf[0] == 0x2D) {
+                newLine = TRUE;
+                codeFound = TRUE;
+            } else {
+                codeFound = TRUE;
+            }
+        }
+
+        // printf("end\n");
+        if (readBytes <= 0) break;
+
+        newBuf[readBytes] = '\0';
+
+        printf("%c", newBuf[0]);
+
+        //printf("response b %02x last %02x\n", newBuf[0], lastChar);
+        if (newBuf[0] == 0x0A && lastChar == 0x0D && codeFound) {
+            //printf("code: %d\n", code);
+            codeFound = FALSE;
+            if (!newLine)
+                break;
+            newLine = FALSE;
+            code = 0;
+        }
+        lastChar = newBuf[0];
+    }
+
+    return code;
+}
+
 
 int connectToSocket(char serverAddress[], int port) {
     int sockfd;
@@ -33,21 +83,14 @@ int connectToSocket(char serverAddress[], int port) {
         return -1;
     }
 	printf("socket connected\n");
+
     return sockfd;
 }
-    /*send a string to the server*/
-    /*
-    bytes = write(sockfd, buf, strlen(buf));
-    if (bytes > 0)
-        printf("Bytes escritos %ld\n", bytes);
-    else {
-        perror("write()");
-        exit(-1);
-    }
-    
+
+int disconnectFromSocket(int sockfd) {
     if (close(sockfd)<0) {
         perror("close()");
         exit(-1);
     }
-    return 0;
-}*/
+    printf("socket disconnected\n");
+}
