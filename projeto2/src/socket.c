@@ -9,15 +9,15 @@
 
 #include <string.h>
 
-// When in passive mode
-int dataAddress[6] = {0,0,0,0,0,0};
-int dataAddressPointer = 0;
-int reading = FALSE;
-int numberRead = 0;
 
 int readSocket(int sockfd, int *extraReturn) {
     char newBuf[1];
     char lastChar = 0x00;
+    // When in passive mode
+    int dataAddress[6] = {0,0,0,0,0,0};
+    int dataAddressPointer = 0;
+    int reading = FALSE;
+    int numberRead = 0;
 
 
     int codeFound = FALSE;
@@ -25,8 +25,6 @@ int readSocket(int sockfd, int *extraReturn) {
     int code = 0;
 
     while(1) {
-        // printf("start\n");
-
         int readBytes = read(sockfd, newBuf, 1);
 
         if (!codeFound) {
@@ -44,7 +42,7 @@ int readSocket(int sockfd, int *extraReturn) {
             {
             case FTP_PASV:
                 if(reading) {
-                    if (newBuf[0] == 0x29) {
+                    if (newBuf[0] == 0x29) { // 0x29 => ')'
                         reading = FALSE;
                         dataAddress[dataAddressPointer++] = numberRead;
 
@@ -58,7 +56,7 @@ int readSocket(int sockfd, int *extraReturn) {
                         //connect to new socket and return it's fd
                         printf("\nConnecting to data socket\n\n");
                         (*extraReturn) = connectToSocket(address, port);
-                    } else if (newBuf[0] == 0x2c) {
+                    } else if (newBuf[0] == 0x2c) { // 0x2c => ','
                         dataAddress[dataAddressPointer++] = numberRead;
                         numberRead = 0;
                     } else if (newBuf[0] >= 0x30 && newBuf[0] <= 0x39) {
@@ -66,7 +64,20 @@ int readSocket(int sockfd, int *extraReturn) {
                         numberRead += newBuf[0] - 0x30;
                     }
                 } else {
-                    if (newBuf[0] == 0x28) reading = TRUE;
+                    if (newBuf[0] == 0x28) reading = TRUE; // 0x28 => '('
+                }
+                break;
+            case FTP_FILE_RCV:
+                if(reading) {
+                    if (newBuf[0] == 0x29) { // 0x29 => ')'
+                        printf("\nReceiving file will have %d bytes\n\n", numberRead);
+                        (*extraReturn) = numberRead;
+                    } else if (newBuf[0] >= 0x30 && newBuf[0] <= 0x39) {
+                        numberRead = numberRead * 10;
+                        numberRead += newBuf[0] - 0x30;
+                    }
+                } else {
+                    if (newBuf[0] == 0x28) reading = TRUE; // 0x28 => '('
                 }
                 break;
             default:
@@ -75,14 +86,11 @@ int readSocket(int sockfd, int *extraReturn) {
 
         }
 
-
-        // printf("end\n");
         if (readBytes <= 0) break;
 
         newBuf[readBytes] = '\0';
 
         if (newBuf[0] == 0x0A && lastChar == 0x0D && codeFound) {
-            //printf("code: %d\n", code);
             codeFound = FALSE;
             if (!newLine)
                 break;
@@ -158,4 +166,28 @@ int writeToSocket(int sockfd, char msg[], int size) {
     }
 
     return bytes;
+}
+
+int readDataSocketToFile(int sockfd, int *filefd, int fileSize) {
+    char newBuf[256];
+    char lastChar = 0x00;
+    
+    while(fileSize) {
+        int readBytes = read(sockfd, newBuf, 256);
+
+        if (readBytes <= 0) break;
+
+        if (newBuf[0] == 0x0A && lastChar == 0x0D) {
+            break;
+        }
+        lastChar = newBuf[0];
+
+        for (int i = 0; i < readBytes; i++) {
+            fputc(newBuf[i], filefd);
+        }
+
+        fileSize -= readBytes;
+    }
+
+    return 0;
 }

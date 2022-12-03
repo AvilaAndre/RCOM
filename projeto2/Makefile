@@ -10,7 +10,10 @@ INCLUDE = include/
 BIN = bin/
 
 # ftp://[<user>:<password>@]<host>/<url-path>
-FTP_FEUP = ftp://anonymous:qualquer-password@ftp.up.pt/pub/robots.txt
+FTP_FEUP = ftp://anonymous:qualquer-password@ftp.up.pt/pub/kodi/timestamp.txt
+FTP_KODI1 = ftp://anonymous:qualquer-password@ftp.up.pt/pub/kodi/screenshots/kodi-addons.jpg
+FTP_KODI2 = ftp://anonymous:qualquer-password@ftp.up.pt/pub/kodi/screenshots/kodi-videolibrary.jpg
+FTP_KODIAPK = ftp://anonymous:qualquer-password@ftp.up.pt/pub/kodi/snapshots/android/arm/kodi-18.0-Leia_alpha2-armeabi-v7a.apk 
 
 # Targets
 .PHONY: all
@@ -26,6 +29,19 @@ clean:
 .PHONY: run_feup
 run_feup:
 	make clean && make && $(BIN)/main $(FTP_FEUP)
+
+.PHONY: run_kodi1
+run_kodi1:
+	make clean && make && $(BIN)/main $(FTP_KODI1)
+
+.PHONY: run_kodi2
+run_kodi2:
+	make clean && make && $(BIN)/main $(FTP_KODI2)
+
+.PHONY: run_kodiapk
+run_kodiapk:
+	make clean && make && $(BIN)/main $(FTP_KODIAPK)
+
 
 # make run arg=ftp://ftp.fe.up.pt
 .PHONY: run

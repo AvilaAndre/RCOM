@@ -108,7 +108,29 @@ int main(int argc, char **argv) {
 
     readSocket(socketfd, &datasocket);
 
-    printf("datasocket = %d \n", datasocket);
+    char *retr = malloc(10 + strlen(url.path));
+    retr[0] = '\0';
+
+    strcat(retr, "retr ");
+    strcat(retr, url.path);
+
+    writeToSocket(socketfd, retr, strlen(retr));
+
+    //Check what the size of the file is
+
+    int fileSize = 0;
+
+    readSocket(socketfd, &fileSize);
+
+    int *fileToWrite = -1;
+    
+
+    fileToWrite = fopen(url.filename, "w+");
+
+    readDataSocketToFile(datasocket, fileToWrite, fileSize);
+
+    fclose(fileToWrite);
+
 
     if (disconnectFromSocket(socketfd) == -1) exit(-1);
 
