@@ -6,9 +6,9 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include "include/URL.h"
-#include "include/utils.h"
-#include "include/socket.h"
+#include "URL.h"
+#include "utils.h"
+#include "socket.h"
 
 
 int getHostnameString(char hostString[], char hostname[]) {
@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
     printf("Username: %s\n", url.user);
 	printf("Password: %s\n", url.password);
 	printf("Host: %s\n", url.host);
-	printf("Path :%s\n", url.path);
+	printf("Path: %s\n", url.path);
 	printf("Filename: %s\n", url.filename);
 
     struct hostent *h;
@@ -61,21 +61,39 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 
-    readSocket(socketfd);
-    /*send a string to the server*/
-    char buf[] = "user anonymous\r\n";
+    readSocket(socketfd, FALSE);
+    
+    int response = 0;
 
-    int bytes = write(socketfd, buf, strlen(buf));
-    if (bytes > 0)
-        printf("Bytes escritos %ld\n", bytes);
-    else {
-        perror("write()");
+    // Sending username
+    char username[] = "user anonymous";
+
+    writeToSocket(socketfd, username, strlen(username));
+
+    response = readSocket(socketfd, FALSE);
+
+    if (response != 331) {
+        printf("Login failed. Wrong username\n");
         exit(-1);
     }
 
-    readSocket(socketfd);
+    // Sending password
 
-    disconnectFromSocket(socketfd);
+    char password[] = "pass anonymous";
+    
+    writeToSocket(socketfd, password, strlen(password));
+
+    response = readSocket(socketfd, FALSE);
+
+    if (response != 230) {
+        printf("Login failed. Wrong password\n");
+        exit(-1);
+    } else {
+        printf("\nLogin successful.\n\n");
+    }
+
+    if (disconnectFromSocket(socketfd) == -1) exit(-1);
+
+
     return 0;
-		
 }

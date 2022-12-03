@@ -9,7 +9,7 @@
 #include <string.h>
 
 
-int readSocket(int sockfd) {
+int readSocket(int sockfd, int printMSG) {
     char newBuf[1];
     char lastChar = 0x00;
 
@@ -40,7 +40,7 @@ int readSocket(int sockfd) {
 
         newBuf[readBytes] = '\0';
 
-        printf("%c", newBuf[0]);
+        if (printMSG) printf("%c", newBuf[0]);
 
         //printf("response b %02x last %02x\n", newBuf[0], lastChar);
         if (newBuf[0] == 0x0A && lastChar == 0x0D && codeFound) {
@@ -90,7 +90,34 @@ int connectToSocket(char serverAddress[], int port) {
 int disconnectFromSocket(int sockfd) {
     if (close(sockfd)<0) {
         perror("close()");
-        exit(-1);
+        return -1;
     }
     printf("socket disconnected\n");
+    return 0;
+}
+
+int writeToSocket(int sockfd, char msg[], int size) {
+    char *buf = malloc(size+2);
+
+    for (int i = 0; i< size; i++) {
+        buf[i] = msg[i];
+    }
+    if (msg[size-1] == '\0') {
+        buf[size-1] = '\r';
+        buf[size] = '\n';
+        buf[size+1] = '\0';
+    } else {
+        buf[size] = '\r';
+        buf[size+1] = '\n';
+        buf[size+2] = '\0';
+    }
+
+    // printf("writing: %s", buf); // DEBUG:
+    int bytes = write(sockfd, buf, strlen(buf));
+    if (bytes <= 0) {
+        perror("write()");
+        return -1;
+    }
+
+    return bytes;
 }
