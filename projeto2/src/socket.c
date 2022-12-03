@@ -169,24 +169,21 @@ int writeToSocket(int sockfd, char msg[], int size) {
 }
 
 int readDataSocketToFile(int sockfd, int *filefd, int fileSize) {
-    char newBuf[256];
-    char lastChar = 0x00;
+    char newBuf[256] = {0};
+
+    int progress = 0;
     
-    while(fileSize) {
+    while(progress < fileSize) {
         int readBytes = read(sockfd, newBuf, 256);
 
         if (readBytes <= 0) break;
-
-        if (newBuf[0] == 0x0A && lastChar == 0x0D) {
-            break;
-        }
-        lastChar = newBuf[0];
 
         for (int i = 0; i < readBytes; i++) {
             fputc(newBuf[i], filefd);
         }
 
-        fileSize -= readBytes;
+        progress += readBytes;
+        printf("Sending... %d/%d (%d%%) sent. \n", progress, fileSize, (int)(((double)progress / (double)fileSize) * 100));
     }
 
     return 0;
