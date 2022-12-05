@@ -24,3 +24,4 @@ enum parseState {read_FTP, read_USR, read_PASS, read_HOST, read_PATH};
 
 void resetURL(url* url);
 void parseURL(url* url, const char *input_url);
+void getPass(url *url);
