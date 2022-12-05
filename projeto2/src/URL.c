@@ -1,5 +1,5 @@
 #include "../include/URL.h"
-
+int noPass = FALSE;
 void resetURL(url *url)
 {
     memset(url->user, 0, MAX_STRING_LENGTH);
@@ -55,15 +55,14 @@ void parseURL(url *url, const char *input_url)
                 memcpy(url->host,url->user,MAX_STRING_LENGTH);
                 memset(url->user, 0, MAX_STRING_LENGTH);
                 memcpy(url->user,"anonymous",9);               
-                getPass(url);
-                //pass and host already read, moving to path state
+                noPass = TRUE;               
                 state = read_PATH;   
                 index = 0;           
             }
             //has user but no pass on the url
             else if(input_url[i] == '@')
             {
-                getPass(url);
+                noPass = TRUE;
                 state = read_HOST;
                 index = 0;
             }
