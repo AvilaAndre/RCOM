@@ -120,7 +120,14 @@ int main(int argc, char **argv) {
 
     int fileSize = 0;
 
-    readSocket(socketfd, &fileSize);
+    int fileCode = readSocket(socketfd, &fileSize);
+
+    if (fileCode == 550) {
+        printf("\nWARNING: File not found\n");
+        //We could ask for another file here
+        if (disconnectFromSocket(socketfd) == -1) exit(-1);
+        return 0;
+    }
 
     int *fileToWrite = -1;
     
