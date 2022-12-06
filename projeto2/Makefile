@@ -17,6 +17,8 @@ FTP_KODI2 = ftp://anonymous:qualquer-password@ftp.up.pt/pub/kodi/screenshots/kod
 FTP_KODIAPK = ftp://anonymous:qualquer-password@ftp.up.pt/pub/kodi/snapshots/android/arm/kodi-18.0-Leia_alpha2-armeabi-v7a.apk 
 FTP_VIM_ROBOTS = ftp://anonymous:qualquer-password@ftp.vim.org/pub/ftp/robots.txt
 
+FTP_NETLAB = ftp://anonymous:qualquer-password@netlab1.fe.up.pt/pub.txt
+
 # Targets
 .PHONY: all
 all: $(BIN)/main
@@ -51,6 +53,10 @@ run_kodiapk:
 .PHONY: run_vim_robots
 run_vim_robots:
 	make clean && make && $(BIN)/main $(FTP_VIM_ROBOTS)
+
+.PHONY: run_netlab
+run_netlab:
+	make clean && make && $(BIN)/main $(FTP_NETLAB)
 
 
 # make run arg=ftp://ftp.fe.up.pt
