@@ -17,7 +17,7 @@ FTP_KODI2 = ftp://anonymous:qualquer-password@ftp.up.pt/pub/kodi/screenshots/kod
 FTP_KODIAPK = ftp://anonymous:qualquer-password@ftp.up.pt/pub/kodi/snapshots/android/arm/kodi-18.0-Leia_alpha2-armeabi-v7a.apk 
 FTP_VIM_ROBOTS = ftp://anonymous:qualquer-password@ftp.vim.org/pub/ftp/robots.txt
 
-FTP_NETLAB = ftp://anonymous:qualquer-password@netlab1.fe.up.pt/pub.txt
+FTP_NETLAB = ftp://rcom:rcom@netlab1.fe.up.pt/files/crab.mp4
 
 # Targets
 .PHONY: all
