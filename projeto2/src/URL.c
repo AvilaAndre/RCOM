@@ -1,5 +1,4 @@
 #include "../include/URL.h"
-int noPass = FALSE;
 void resetURL(url *url)
 {
     memset(url->user, 0, MAX_STRING_LENGTH);
@@ -10,14 +9,14 @@ void resetURL(url *url)
     url->port = 21;
 }
 
-void getPass(url *url)
+/*void getPass(url *url)
 {
     printf("College email address needed to be used as password: ");
     char buf[100];
 	while (strlen(fgets(buf, 100, stdin)) < 14)
 		printf("\nIncorrect input, please try again: ");
     memcpy(url->password,buf,strlen(buf)-1);
-}
+}*/
 
 //ftp://ftp.up.pt/pub/kodi/timestamp.txt
 //ftp://anonymous:qualquer-password@ftp.up.pt/pub/kodi/robots.txt
@@ -54,15 +53,14 @@ void parseURL(url *url, const char *input_url)
                 printf("You are in anonymous mode\n");
                 memcpy(url->host,url->user,MAX_STRING_LENGTH);
                 memset(url->user, 0, MAX_STRING_LENGTH);
-                memcpy(url->user,"anonymous",9);               
-                noPass = TRUE;               
+                memcpy(url->user,"anonymous",9);
+                memcpy(url->password, "qualquer-password",17);                          
                 state = read_PATH;   
                 index = 0;           
             }
             //has user but no pass on the url
             else if(input_url[i] == '@')
             {
-                noPass = TRUE;
                 state = read_HOST;
                 index = 0;
             }
