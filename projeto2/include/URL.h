@@ -7,8 +7,6 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#define FALSE 0
-#define TRUE 1
 #define MAX_STRING_LENGTH 256
 typedef char url_data[MAX_STRING_LENGTH];
 
