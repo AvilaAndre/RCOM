@@ -13,8 +13,8 @@ on Y4 configure eth1
 
 configure bridge on microtik
 
-    /interface bridge port remove [find interface=ether<PORY4eth1>]
-    /interface bridge port add bridge=bridge11 interface=ether<PORY4eth1>
+    /interface bridge port remove [find interface=ether<PORT4eth1>]
+    /interface bridge port add bridge=bridgeY1 interface=ether<PORT4eth1>
 
 ### – Enable IP forwarding
 

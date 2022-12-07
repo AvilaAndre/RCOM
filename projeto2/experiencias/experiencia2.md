@@ -40,20 +40,20 @@ now we will see the new bridges
 
 ## 3. Remove the ports where tuxY3, tuxY4 and tuxY2 are connected from the default bridge (bridge) and add them the corresponding ports to bridgeY0 and bridgeY1
 
-    /interface bridge port remove [find interface=ether<PORY2eth0>]
-    /interface bridge port remove [find interface=ether<PORY3eth0>]
-    /interface bridge port remove [find interface=ether<PORY4eth0>]
+    /interface bridge port remove [find interface=ether<PORTY2eth0>]
+    /interface bridge port remove [find interface=ether<PORTY3eth0>]
+    /interface bridge port remove [find interface=ether<PORTY4eth0>]
 
 PORT 1, 2 and 3 are the positions on the switch where we connected the cables
 
 criar bridgeY0
 
-    /interface bridge port add bridge=bridge10 interface=ether<PORY3eth0>
-    /interface bridge port add bridge=bridge10 interface=ether<PORY4eth0>
+    /interface bridge port add bridge=bridgeY0 interface=ether<PORTY3eth0>
+    /interface bridge port add bridge=bridgeY0 interface=ether<PORTY4eth0>
 
 criar bridgeY1
 
-    /interface bridge port add bridge=bridge11 interface=ether<PORY2eth0>
+    /interface bridge port add bridge=bridgeY1 interface=ether<PORTY2eth0>
 
 ## 4. Start the capture at Y3.eth0
 
