@@ -143,7 +143,7 @@ int disconnectFromSocket(int sockfd) {
 }
 
 int writeToSocket(int sockfd, char msg[], int size) {
-    char *buf = malloc(size+2);
+    char *buf = malloc(size+3);
 
     for (int i = 0; i< size; i++) {
         buf[i] = msg[i];
